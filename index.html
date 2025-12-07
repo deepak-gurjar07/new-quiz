@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-5EMJLER00F"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-5EMJLER00F');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CDS PYQ Quiz Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+    <header>
+        <div class="logo" onclick="app.goHome()">CDS <span class="highlight">Master</span></div>
+        <button id="theme-toggle" class="icon-btn" aria-label="Toggle Dark Mode">
+            <svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            <svg id="sun-icon" class="hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+        </button>
+    </header>
+
+    <main id="app">
+        <div id="loader" class="screen hidden">
+            <div class="spinner"></div>
+            <p id="loader-text">Loading...</p>
+        </div>
+
+        <div id="error-screen" class="screen hidden">
+            <div class="error-box">
+                <h2>⚠️ Error</h2>
+                <p id="error-message">Something went wrong.</p>
+                <button onclick="location.reload()" class="btn btn-primary">Retry</button>
+            </div>
+        </div>
+
+        <div id="screen-subjects" class="screen active">
+            <div class="header-section">
+                <h1>Select Subject</h1>
+                <p>Choose a subject to practice PYQs</p>
+            </div>
+            <div id="subject-grid" class="grid-container"></div>
+        </div>
+
+        <div id="screen-years" class="screen hidden">
+            <button class="btn-back" onclick="app.goBack()">← Back</button>
+            <div class="header-section">
+                <h1 id="selected-subject-title">Subject</h1>
+                <p>Select a Year</p>
+            </div>
+            <div id="year-grid" class="grid-container"></div>
+        </div>
+
+        <div id="screen-subtopics" class="screen hidden">
+            <button class="btn-back" onclick="app.goBack()">← Back</button>
+            <div class="header-section">
+                <h1 id="config-title">Configure Quiz</h1>
+                <p>Select topics to include</p>
+            </div>
+            
+            <div class="config-card">
+                <h3>Available Subtopics</h3>
+                <div id="subtopic-list" class="checkbox-list"></div>
+                <div class="action-area">
+                    <button id="btn-start-quiz" class="btn btn-primary btn-large">Start Quiz</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="screen-quiz" class="screen hidden">
+            <button class="btn-back" onclick="app.quitQuiz()">← Quit Quiz</button>
+
+            <div class="quiz-header">
+                <div class="progress-wrapper">
+                    <span id="q-progress">1 / 10</span>
+                    <div class="progress-bar"><div id="progress-fill"></div></div>
+                </div>
+            </div>
+
+            <div class="question-card">
+                <h2 id="q-text">Loading...</h2>
+                <div id="q-options" class="options-list"></div>
+            </div>
+
+            <div class="quiz-footer">
+                <button id="btn-prev" class="btn btn-outline hidden">Previous</button>
+                <button id="btn-next" class="btn btn-primary">Next Question</button>
+                <button id="btn-submit" class="btn btn-secondary hidden">Submit Quiz</button>
+            </div>
+        </div>
+
+        <div id="screen-result" class="screen hidden">
+            <div class="result-card">
+                <h1>Quiz Completed!</h1>
+                <div class="score-circle">
+                    <span id="score-text">0</span>
+                    <small>Score</small>
+                </div>
+                <div class="stats-row">
+                    <div class="stat green">
+                        <span id="stat-correct">0</span> Correct
+                    </div>
+                    <div class="stat red">
+                        <span id="stat-wrong">0</span> Wrong
+                    </div>
+                </div>
+                <button onclick="location.reload()" class="btn btn-primary">Take Another Quiz</button>
+            </div>
+
+            <div class="result-card">
+                <h3>Topic-wise Performance</h3>
+                <p style="margin-top:0.5rem; font-size:0.9rem; color:var(--text-muted);">
+                    See which topics are strong and which need more practice.
+                </p>
+                <div id="topic-stats" style="margin-top:1rem;"></div>
+            </div>
+
+            <div class="review-section">
+                <h3>Review Answers</h3>
+                <div id="review-list"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
