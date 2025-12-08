@@ -192,6 +192,8 @@ const QUIZ_TREE = {
     "2022-II",
     "2023-I",
     "2023-II",
+    "2024-I",
+    "2024-II",
   ],
 };
 
@@ -205,6 +207,7 @@ const appState = {
   currentQuestionIndex: 0,
   userAnswers: {},
   topicMap: null,
+  _resultsComputed: false
 };
 
 // **FIXED: Correct variable name used throughout functions**
@@ -287,7 +290,7 @@ const app = {
         );
       } catch (_) {}
     }
-
+    appState._resultsComputed = true;
     saveAppState();
   },
 
@@ -311,6 +314,8 @@ const app = {
       app.showScreen("screen-years");
     } else if (appState.currentScreen === "screen-quiz") {
       app.showScreen("screen-subtopics");
+    }else if (appState.currentScreen === "screen-result") {
+      app.showScreen("screen-subjects");
     }
   },
 
@@ -484,6 +489,8 @@ function startQuizEngine(questions) {
   appState.questions = questions;
   appState.currentQuestionIndex = 0;
   appState.userAnswers = {};
+
+  appState._resultsComputed = false; 
 
   app.showScreen("screen-quiz");
   renderQuestion();
@@ -830,8 +837,10 @@ function restoreOrBoot() {
       app.showScreen("screen-subjects", { skipHistory: true });
     }
   } else if (screen === "screen-result") {
-    if (appState.questions && appState.questions.length > 0) {
-      calculateResults();
+    if (appState._resultsComputed) {
+      app.showScreen("screen-result", { skipHistory: true });
+    } else if (appState.questions && appState.questions.length > 0) {
+      calculateResults(); // first time only
     } else {
       app.showScreen("screen-subjects", { skipHistory: true });
     }
