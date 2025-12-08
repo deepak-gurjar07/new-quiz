@@ -1,1033 +1,208 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-5EMJLER00F"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-5EMJLER00F');
-</script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CDS PYQ Quiz Platform</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600&display=swap" rel="stylesheet">
-    
+  <head>
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-5EMJLER00F"
+    ></script>
     <script>
-        window.MathJax = {
-            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
-            svg: { fontCache: 'global' }
-        };
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-5EMJLER00F");
     </script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CDS PYQ Quiz Platform</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
 
-    <style>
-        /* --- CSS STYLES --- */
-        :root {
-            --primary: #f97316;       /* Orange */
-            --primary-hover: #ea580c;
-            --secondary: #2563eb;     /* Blue */
-            --bg-body: #f8fafc;       /* Light Mode BG */
-            --bg-card: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --success: #22c55e;
-            --error: #ef4444;
-            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-            --radius: 12px;
-        }
+    <link rel="stylesheet" href="style.css" />
 
-        [data-theme="dark"] {
-            --bg-body: #0f172a;       /* Dark Mode BG */
-            --bg-card: #1e293b;
-            --text-main: #f1f5f9;
-            --text-muted: #94a3b8;
-            --border: #334155;
-            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.5);
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            transition: background 0.3s, color 0.3s;
-            min-height: 100vh;
-        }
-
-        /* Header */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 2rem;
-            background: var(--bg-card);
-            box-shadow: var(--shadow);
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        /* Updated Logo Style: Clickable */
-        .logo { 
-            font-family: 'Poppins', sans-serif; 
-            font-weight: 700; 
-            font-size: 1.5rem; 
-            cursor: pointer;
-            user-select: none;
-        }
-        .highlight { color: var(--primary); }
-
-        .icon-btn {
-            background: none; border: none; cursor: pointer; color: var(--text-main);
-            padding: 0.5rem; border-radius: 50%;
-        }
-        .icon-btn:hover { background: rgba(0,0,0,0.1); }
-
-        /* Layout */
-        main { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
-        .screen { display: none; animation: fadeIn 0.4s ease; }
-        .screen.active { display: block; }
-        .hidden { display: none !important; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .header-section { margin-bottom: 2rem; text-align: center; }
-        .header-section h1 { font-family: 'Poppins', sans-serif; color: var(--secondary); margin-bottom: 0.5rem; }
-        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; }
-
-        /* Cards & Buttons */
-        .card-btn {
-            background: var(--bg-card); border: 1px solid var(--border);
-            padding: 1.5rem; border-radius: var(--radius);
-            text-align: center; font-weight: 600; cursor: pointer;
-            box-shadow: var(--shadow); transition: all 0.2s;
-            color: var(--text-main); text-transform: capitalize;
-        }
-        .card-btn:hover { transform: translateY(-3px); border-color: var(--primary); color: var(--primary); }
-
-        .btn {
-            padding: 0.75rem 1.5rem; border: none; border-radius: 8px;
-            font-weight: 600; cursor: pointer; font-size: 1rem; transition: 0.2s;
-        }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: var(--primary-hover); }
-        .btn-secondary { background: var(--secondary); color: white; }
-        
-        /* Outline button for Previous to distinguish it */
-        .btn-outline { 
-            background: transparent; 
-            border: 2px solid var(--secondary); 
-            color: var(--secondary); 
-        }
-        .btn-outline:hover { background: rgba(37, 99, 235, 0.1); }
-
-        .btn-back { background: none; border: none; color: var(--text-muted); cursor: pointer; margin-bottom: 1rem; font-size: 0.9rem; }
-        .btn-back:hover { color: var(--primary); }
-        .btn-large { width: 100%; margin-top: 1rem; padding: 1rem; }
-
-        /* Subtopic Selection */
-        .config-card { background: var(--bg-card); padding: 2rem; border-radius: var(--radius); box-shadow: var(--shadow); }
-        .checkbox-list { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
-        .checkbox-item {
-            display: flex; align-items: center; gap: 0.5rem; 
-            padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; cursor: pointer;
-        }
-        .checkbox-item:hover { background: rgba(0,0,0,0.02); }
-        input[type="checkbox"] { accent-color: var(--primary); transform: scale(1.2); }
-
-        /* Quiz Interface */
-        .progress-wrapper { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
-        .progress-bar { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
-        #progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
-
-        .question-card { background: var(--bg-card); padding: 2rem; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 2rem; }
-        .question-card h2 { margin-bottom: 1.5rem; line-height: 1.5; font-size: 1.2rem; }
-
-        .options-list { display: flex; flex-direction: column; gap: 1rem; }
-        .option-label {
-            display: flex; padding: 1rem; border: 2px solid var(--border);
-            border-radius: 8px; cursor: pointer; transition: 0.2s;
-        }
-        .option-label:hover { border-color: var(--secondary); background: rgba(37, 99, 235, 0.05); }
-        .option-label.selected { border-color: var(--secondary); background: rgba(37, 99, 235, 0.1); font-weight: 600; }
-
-        /* Updated Quiz Footer for 3 buttons */
-        .quiz-footer { display: flex; justify-content: space-between; gap: 1rem; }
-
-        /* Results */
-        .result-card { text-align: center; background: var(--bg-card); padding: 3rem 1rem; border-radius: var(--radius); margin-bottom: 2rem; }
-        .score-circle {
-            width: 120px; height: 120px; background: var(--secondary); color: white;
-            border-radius: 50%; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; margin: 2rem auto;
-        }
-        #score-text { font-size: 2.5rem; font-weight: 700; }
-        .stats-row { display: flex; justify-content: center; gap: 2rem; margin-bottom: 2rem; }
-        .stat { font-weight: 600; font-size: 1.2rem; }
-        .stat.green { color: var(--success); }
-        .stat.red { color: var(--error); }
-
-        /* Review Section */
-        .review-item { background: var(--bg-card); padding: 1rem; margin-bottom: 1rem; border-radius: 8px; border-left: 4px solid var(--border); }
-        .review-item.correct { border-left-color: var(--success); }
-        .review-item.wrong { border-left-color: var(--error); }
-        .ans-row { margin-top: 0.5rem; font-size: 0.9rem; }
-        .ans-row span { font-weight: 600; }
-        .text-green { color: var(--success); }
-        .text-red { color: var(--error); }
-
-        /* Loader */
-        .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        #loader { text-align: center; margin-top: 4rem; }
-
-        /* Mobile */
-        @media (max-width: 600px) {
-            .checkbox-list { grid-template-columns: 1fr; }
-            .header-section h1 { font-size: 1.5rem; }
-            .quiz-footer { flex-direction: column-reverse; } /* Stack buttons on mobile */
-            .btn { width: 100%; }
-        }
-    </style>
-</head>
-<body>
-
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [
+            ["$", "$"],
+            ["\\(", "\\)"],
+          ],
+        },
+        svg: { fontCache: "global" },
+      };
+    </script>
+    <script
+      id="MathJax-script"
+      async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    ></script>
+  </head>
+  <body>
     <header>
-        <div class="logo" onclick="app.goHome()">CDS <span class="highlight">Master</span></div>
-        <button id="theme-toggle" class="icon-btn" aria-label="Toggle Dark Mode">
-            <svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-            <svg id="sun-icon" class="hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-        </button>
+      <div class="logo" onclick="app.goHome()">
+        CDS <span class="highlight">Master</span>
+      </div>
+      <button id="theme-toggle" class="icon-btn" aria-label="Toggle Dark Mode">
+        <svg
+          id="moon-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+        <svg
+          id="sun-icon"
+          class="hidden"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+      </button>
     </header>
 
     <main id="app">
-        <div id="loader" class="screen hidden">
-            <div class="spinner"></div>
-            <p id="loader-text">Loading...</p>
+      <div id="loader" class="screen hidden">
+        <div class="spinner"></div>
+        <p id="loader-text">Loading...</p>
+      </div>
+
+      <div id="error-screen" class="screen hidden">
+        <div class="error-box">
+          <h2>⚠️ Error</h2>
+          <p id="error-message">Something went wrong.</p>
+          <button onclick="location.reload()" class="btn btn-primary">
+            Retry
+          </button>
+        </div>
+      </div>
+
+      <div id="screen-subjects" class="screen active">
+        <div class="header-section">
+          <h1>Select Subject</h1>
+          <p>Choose a subject to practice PYQs</p>
+        </div>
+        <div id="subject-grid" class="grid-container"></div>
+      </div>
+
+      <div id="screen-years" class="screen hidden">
+        <button class="btn-back" onclick="app.goBack()">← Back</button>
+        <div class="header-section">
+          <h1 id="selected-subject-title">Subject</h1>
+          <p>Select a Year</p>
+        </div>
+        <div id="year-grid" class="grid-container"></div>
+      </div>
+
+      <div id="screen-subtopics" class="screen hidden">
+        <button class="btn-back" onclick="app.goBack()">← Back</button>
+        <div class="header-section">
+          <h1 id="config-title">Configure Quiz</h1>
+          <p>Select topics to include</p>
         </div>
 
-        <div id="error-screen" class="screen hidden">
-            <div class="error-box">
-                <h2>⚠️ Error</h2>
-                <p id="error-message">Something went wrong.</p>
-                <button onclick="location.reload()" class="btn btn-primary">Retry</button>
-            </div>
+        <div class="config-card">
+          <h3>Available Subtopics</h3>
+          <div id="subtopic-list" class="checkbox-list"></div>
+          <div class="action-area">
+            <button id="btn-start-quiz" class="btn btn-primary btn-large">
+              Start Quiz
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="screen-quiz" class="screen hidden">
+        <button class="btn-back" onclick="app.quitQuiz()">← Quit Quiz</button>
+
+        <div class="quiz-header">
+          <div class="progress-wrapper">
+            <span id="q-progress">1 / 10</span>
+            <div class="progress-bar"><div id="progress-fill"></div></div>
+          </div>
         </div>
 
-        <div id="screen-subjects" class="screen active">
-            <div class="header-section">
-                <h1>Select Subject</h1>
-                <p>Choose a subject to practice PYQs</p>
-            </div>
-            <div id="subject-grid" class="grid-container">
-                </div>
+        <div class="question-card">
+          <h2 id="q-text">Loading...</h2>
+          <div id="q-options" class="options-list"></div>
         </div>
 
-        <div id="screen-years" class="screen hidden">
-            <button class="btn-back" onclick="app.goBack()">← Back</button>
-            <div class="header-section">
-                <h1 id="selected-subject-title">Subject</h1>
-                <p>Select a Year</p>
-            </div>
-            <div id="year-grid" class="grid-container">
-                </div>
+        <div class="quiz-footer">
+          <button id="btn-prev" class="btn btn-outline hidden">Previous</button>
+          <button id="btn-next" class="btn btn-primary">Next Question</button>
+          <button id="btn-submit" class="btn btn-secondary hidden">
+            Submit Quiz
+          </button>
         </div>
+      </div>
 
-        <div id="screen-subtopics" class="screen hidden">
-            <button class="btn-back" onclick="app.goBack()">← Back</button>
-            <div class="header-section">
-                <h1 id="config-title">Configure Quiz</h1>
-                <p>Select topics to include</p>
-            </div>
-            
-            <div class="config-card">
-                <h3>Available Subtopics</h3>
-                <div id="subtopic-list" class="checkbox-list">
-                    </div>
-                
-                <div class="action-area">
-                    <button id="btn-start-quiz" class="btn btn-primary btn-large">Start Quiz</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="screen-quiz" class="screen hidden">
-            <button class="btn-back" onclick="app.quitQuiz()">← Quit Quiz</button>
-
-            <div class="quiz-header">
-                <div class="progress-wrapper">
-                    <span id="q-progress">1 / 10</span>
-                    <div class="progress-bar"><div id="progress-fill"></div></div>
-                </div>
-            </div>
-
-            <div class="question-card">
-                <h2 id="q-text">Loading...</h2>
-                <div id="q-options" class="options-list">
-                    </div>
-            </div>
-
-            <div class="quiz-footer">
-                <button id="btn-prev" class="btn btn-outline hidden">Previous</button>
-                
-                <button id="btn-next" class="btn btn-primary">Next Question</button>
-                <button id="btn-submit" class="btn btn-secondary hidden">Submit Quiz</button>
-            </div>
-        </div>
-
-        <div id="screen-result" class="screen hidden">
-    <div class="result-card">
-        <h1>Quiz Completed!</h1>
-        <div class="score-circle">
+      <div id="screen-result" class="screen hidden">
+        <div class="result-card">
+          <h1>Quiz Completed!</h1>
+          <div class="score-circle">
             <span id="score-text">0</span>
             <small>Score</small>
-        </div>
-        <div class="stats-row">
+          </div>
+          <div class="stats-row">
             <div class="stat green">
-                <span id="stat-correct">0</span> Correct
+              <span id="stat-correct">0</span> Correct
             </div>
-            <div class="stat red">
-                <span id="stat-wrong">0</span> Wrong
-            </div>
+            <div class="stat red"><span id="stat-wrong">0</span> Wrong</div>
+          </div>
+          <button
+            onclick="clearSavedAppState(); location.reload()"
+            class="btn btn-primary"
+          >
+            Take Another Quiz
+          </button>
         </div>
-        <!-- You can change this to a proper "Home" / "New Quiz" later -->
-        <button onclick="location.reload()" class="btn btn-primary">Take Another Quiz</button>
-    </div>
 
-    <!-- New: Topic-wise Performance Card -->
-    <div class="result-card">
-        <h3>Topic-wise Performance</h3>
-        <p style="margin-top:0.5rem; font-size:0.9rem; color:var(--text-muted);">
+        <div class="result-card">
+          <h3>Topic-wise Performance</h3>
+          <p
+            style="
+              margin-top: 0.5rem;
+              font-size: 0.9rem;
+              color: var(--text-muted);
+            "
+          >
             See which topics are strong and which need more practice.
-        </p>
-        <div id="topic-stats" style="margin-top:1rem;"></div>
-    </div>
-
-    <div class="review-section">
-        <h3>Review Answers</h3>
-        <div id="review-list"></div>
-    </div>
-</div>
-
-</div>
+          </p>
+          <div id="topic-stats" style="margin-top: 1rem"></div>
         </div>
+
+        <div class="review-section">
+          <h3>Review Answers</h3>
+          <div id="review-list"></div>
+        </div>
+      </div>
     </main>
 
-<script>
-    /**
-     * CDS PYQ Quiz Platform
-     * Single File Version for Sandbox Compatibility
-     * FEATURES: MathJax, HTML Parsing, Back Button, Home Button, Prev Button, State Persistence
-     */
-
-    const REPO_OWNER = 'deepak-gurjar07';
-    const REPO_NAME = 'cds-quiz';
-    const BRANCH = 'main';
-
-    // --- CONFIGURATION: STATIC DATA MAP ---
-    const QUIZ_TREE = {
-        "computer_science": ["2025-I"],
-        "economics": [
-            "2007-II", "2008-I", "2008-II", "2011-II", "2012-I", "2012-II",
-            "2013-I", "2013-II", "2014-I", "2014-II", "2015-I", "2015-II",
-            "2016-I", "2016-II", "2017-I", "2017-II", "2018-I", "2018-II",
-            "2019-I", "2019-II", "2020-I", "2025-I"
-        ],
-        "geography": [
-            "2007-I", "2007-II", "2008-I", "2008-II", "2009-I", "2009-II",
-            "2010-I", "2010-II", "2011-I", "2011-II", "2012-I", "2012-II",
-            "2013-I", "2013-II", "2014-I", "2014-II", "2015-I", "2015-II",
-            "2016-I", "2016-II", "2017-I", "2017-II", "2018-1", "2018-II",
-            "2019-I", "2019-II", "2020-I", "2024-II", "2025-I"
-        ],
-        "history": [
-            "2007-II", "2008-I", "2008-II", "2009-I", "2009-II", "2010-I",
-            "2010-II", "2011-I", "2011-II", "2012-I", "2012-II", "2013-I",
-            "2013-II", "2014-I", "2014-II", "2015-I", "2015-II", "2016-I",
-            "2016-II", "2017-I", "2017-II", "2018-I", "2018-II", "2019-I",
-            "2019-II", "2020-I", "2024-II", "2025-I"
-        ],
-        "polity": [
-            "2007-I", "2007-II", "2008-I", "2008-II", "2009-I", "2009-II",
-            "2010-I", "2010-II", "2011-I", "2012-I", "2012-II", "2013-I",
-            "2013-II", "2014-I", "2014-II", "2015-I", "2015-II", "2016-I",
-            "2016-II", "2017-I", "2017-II", "2018-I", "2018-II", "2019-I",
-            "2019-II", "2020-I", "2024-II", "2025-I"
-        ],
-        "science": [
-            "2007-I", "2007-II", "2008-I", "2008-II", "2009-I", "2009-II",
-            "2010-I", "2010-II", "2011-I", "2011-II", "2012-I", "2012-II",
-            "2013-I", "2013-II", "2014-I", "2014-II", "2015-I", "2015-II",
-            "2016-I", "2016-II", "2017-I", "2017-II", "2018-I", "2018-II",
-            "2019-I", "2019-II", "2020-I", "2020-II", "2025-I"
-        ],
-        "Mathematics": [
-            "2007-I", "2007-II", "2008-I", "2008-II", "2009-I", "2009-II",
-            "2010-I", "2010-II", "2011-I", "2011-II", "2012-I", "2012-II",
-            "2013-I", "2013-II", "2014-I", "2014-II", "2015-I", "2015-II",
-            "2016-I", "2016-II", "2017-I", "2017-II", "2018-I", "2018-II",
-            "2019-I", "2019-II", "2020-I", "2020-II", "2021-I", "2021-II", "2022-I", "2022-II", "2023-I", "2023-II"
-        ]
-    };
-
-    // --- App State ---
-    const appState = {
-        currentScreen: 'screen-subjects',
-        subject: null,
-        year: null,
-        subtopics: [],
-        questions: [],
-        currentQuestionIndex: 0,
-        userAnswers: {},
-        topicMap: null
-    };
-
-    // **FIXED: Correct variable name used throughout functions**
-    const APP_STATE_STORAGE_KEY = 'cdsQuizStateV1';
-
-    // --- DOM Elements ---
-    const screens = {
-        subjects: document.getElementById('screen-subjects'),
-        years: document.getElementById('screen-years'),
-        subtopics: document.getElementById('screen-subtopics'),
-        quiz: document.getElementById('screen-quiz'),
-        result: document.getElementById('screen-result'),
-        loader: document.getElementById('loader'),
-        error: document.getElementById('error-screen')
-    };
-
-
-    // --- Helpers for saving/restoring app state ---
-    function saveAppState() {
-        try {
-            const toSave = {
-                currentScreen: appState.currentScreen,
-                subject: appState.subject,
-                year: appState.year,
-                subtopics: appState.subtopics,
-                questions: appState.questions,
-                currentQuestionIndex: appState.currentQuestionIndex,
-                userAnswers: appState.userAnswers,
-                topicMap: appState.topicMap
-            };
-            localStorage.setItem(APP_STATE_STORAGE_KEY, JSON.stringify(toSave));
-        } catch (err) {
-            console.warn('Failed to save app state', err);
-        }
-    }
-
-    function loadSavedAppState() {
-        try {
-            const raw = localStorage.getItem(APP_STATE_STORAGE_KEY);
-            if (!raw) return null;
-            return JSON.parse(raw);
-        } catch (err) {
-            console.warn('Failed to parse saved app state', err);
-            return null;
-        }
-    }
-
-    function clearSavedAppState() {
-        try {
-            localStorage.removeItem(APP_STATE_STORAGE_KEY);
-        } catch (err) {
-            console.warn('Failed to clear saved app state', err);
-        }
-    }
-
-    // --- Navigation Logic ---
-    const app = {
-        showScreen: (screenId, options = {}) => {
-            Object.values(screens).forEach(s => s.classList.remove('active', 'hidden'));
-            Object.values(screens).forEach(s => {
-                if (s.id !== screenId) s.classList.add('hidden');
-            });
-
-            const el = document.getElementById(screenId);
-            if (!el) return;
-
-            el.classList.add('active');
-            appState.currentScreen = screenId;
-
-            // History integration for browser back button
-            if (!options.skipHistory) {
-                try {
-                    history.pushState({
-                        screenId
-                    }, '', '#' + screenId);
-                } catch (_) {}
-            }
-
-            saveAppState();
-        },
-
-        showLoader: (msg = "Loading...") => {
-            document.getElementById('loader-text').textContent = msg;
-            Object.values(screens).forEach(s => s.classList.add('hidden'));
-            screens.loader.classList.remove('hidden');
-        },
-
-        showError: (msg) => {
-            document.getElementById('error-message').textContent = msg;
-            Object.values(screens).forEach(s => s.classList.add('hidden'));
-            screens.error.classList.remove('hidden');
-            screens.error.classList.add('active');
-        },
-
-        goBack: () => {
-            if (appState.currentScreen === 'screen-years') {
-                app.showScreen('screen-subjects');
-            } else if (appState.currentScreen === 'screen-subtopics') {
-                app.showScreen('screen-years');
-            } else if (appState.currentScreen === 'screen-quiz') {
-                app.showScreen('screen-subtopics');
-            }
-        },
-
-        goHome: () => {
-            if (confirm("Return to Home? Any current progress will be lost.")) {
-                clearSavedAppState();
-                app.showScreen('screen-subjects');
-            }
-        },
-
-        quitQuiz: () => {
-            if (confirm("Are you sure you want to quit the quiz? Your progress will be lost.")) {
-                app.showScreen('screen-subtopics');
-            }
-        }
-    };
-
-    // --- 1. Load Subjects ---
-    function loadSubjects() {
-        console.log("Loading Subjects...");
-        const grid = document.getElementById('subject-grid');
-        grid.innerHTML = '';
-
-        const subjects = Object.keys(QUIZ_TREE);
-
-        subjects.forEach(subName => {
-            const displayName = subName
-                .split('_')
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(' ');
-
-            const btn = document.createElement('div');
-            btn.className = 'card-btn';
-            btn.textContent = displayName;
-            btn.onclick = () => selectSubject(subName);
-            grid.appendChild(btn);
-        });
-
-        // Don't auto-show here, restoreOrBoot handles showing the correct screen
-    }
-
-    // --- 2. Load Years ---
-    function selectSubject(subjectName) {
-        appState.subject = subjectName;
-        // Don't rely on localStorage 'lastSubject', use appState
-        
-        const title = subjectName
-            .split('_')
-            .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-            .join(' ');
-        document.getElementById('selected-subject-title').textContent = title;
-
-        const years = QUIZ_TREE[subjectName] || [];
-
-        const grid = document.getElementById('year-grid');
-        grid.innerHTML = '';
-
-        if (years.length === 0) {
-            grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No papers added for this subject yet.</p>';
-        } else {
-            years.forEach(year => {
-                const btn = document.createElement('div');
-                btn.className = 'card-btn';
-                btn.textContent = year;
-                btn.onclick = () => selectYear(subjectName, `${year}.json`);
-                grid.appendChild(btn);
-            });
-        }
-
-        app.showScreen('screen-years');
-    }
-
-    // --- 3. Fetch Full JSON & Extract Subtopics ---
-    async function selectYear(subject, filename) {
-        const rawUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${subject}/${filename}`;
-        appState.year = filename.replace('.json', '');
-
-        app.showLoader("Parsing Questions...");
-
-        try {
-            const res = await fetch(rawUrl);
-            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-            const json = await res.json();
-
-            // SMART PARSER LOGIC
-            let finalMap = {};
-
-            if (json.subtopics) {
-                finalMap = json.subtopics;
-            } else if (json.topics) {
-                finalMap = json.topics;
-            } else {
-                const keys = Object.keys(json);
-                keys.forEach(key => {
-                    if (Array.isArray(json[key])) {
-                        finalMap[key] = json[key];
-                    }
-                });
-            }
-
-            appState.topicMap = finalMap;
-            const subtopics = Object.keys(finalMap);
-
-            renderSubtopics(subtopics);
-            app.showScreen('screen-subtopics');
-
-        } catch (err) {
-            console.error(err);
-            app.showError("Error parsing the question file. Check console for details.");
-        }
-    }
-
-    // --- Subtopic Rendering ---
-    function renderSubtopics(topicList) {
-        const list = document.getElementById('subtopic-list');
-        list.innerHTML = '';
-
-        if (topicList.length === 0) {
-            list.innerHTML = '<p>No subtopics found. The file structure might be unrecognized.</p>';
-            return;
-        }
-
-        topicList.forEach(topic => {
-            const questionsInTopic = appState.topicMap[topic];
-            const qCount = questionsInTopic ? questionsInTopic.length : 0;
-            if (qCount === 0) return;
-
-            const label = document.createElement('label');
-            label.className = 'checkbox-item';
-            label.innerHTML = `
-            <input type="checkbox" value="${topic}" checked>
-            <span>${topic} <small class="text-muted">(${qCount})</small></span>
-        `;
-            list.appendChild(label);
-        });
-
-        document.getElementById('btn-start-quiz').onclick = generateQuizFromSelection;
-    }
-
-    // --- Quiz Generation ---
-    function generateQuizFromSelection() {
-        const checkboxes = document.querySelectorAll('#subtopic-list input:checked');
-        const selectedTopics = Array.from(checkboxes).map(cb => cb.value);
-
-        if (selectedTopics.length === 0) {
-            alert("Please select at least one topic.");
-            return;
-        }
-
-        let quizQuestions = [];
-        selectedTopics.forEach(topic => {
-            const questions = appState.topicMap[topic];
-            if (questions) {
-                const taggedQuestions = questions.map(q => ({ ...q,
-                    _topic: topic
-                }));
-                quizQuestions = [...quizQuestions, ...taggedQuestions];
-            }
-        });
-
-        startQuizEngine(quizQuestions);
-    }
-
-    // --- Quiz Engine ---
-    function startQuizEngine(questions) {
-        appState.questions = questions;
-        appState.currentQuestionIndex = 0;
-        appState.userAnswers = {};
-
-        app.showScreen('screen-quiz');
-        renderQuestion();
-    }
-
-    function renderQuestion() {
-        const qData = appState.questions[appState.currentQuestionIndex];
-        if (!qData) return;
-
-        const total = appState.questions.length;
-        const current = appState.currentQuestionIndex + 1;
-        document.getElementById('q-progress').textContent = `${current} / ${total}`;
-        document.getElementById('progress-fill').style.width = `${(current / total) * 100}%`;
-
-        const qText = qData.question || qData.statement || "Question text missing";
-        document.getElementById('q-text').innerHTML = `${current}. ${qText}`;
-
-        const optionsContainer = document.getElementById('q-options');
-        optionsContainer.innerHTML = '';
-
-        let options = qData.options || qData.choices || [];
-        if (!Array.isArray(options) && typeof options === 'object') {
-            options = Object.values(options);
-        }
-
-        options.forEach((optText, index) => {
-            const label = document.createElement('label');
-            label.className = 'option-label';
-            const isSelected = appState.userAnswers[appState.currentQuestionIndex] === optText;
-            if (isSelected) label.classList.add('selected');
-
-            label.innerHTML = `
-            <input type="radio" name="q-opt" class="hidden" ${isSelected ? 'checked' : ''}>
-            <span>${optText}</span>
-        `;
-            label.onclick = () => selectOption(optText, index);
-            optionsContainer.appendChild(label);
-        });
-
-        const btnPrev = document.getElementById('btn-prev');
-        const btnNext = document.getElementById('btn-next');
-        const btnSubmit = document.getElementById('btn-submit');
-
-        if (current === 1) {
-            btnPrev.classList.add('hidden');
-        } else {
-            btnPrev.classList.remove('hidden');
-        }
-
-        if (current === total) {
-            btnNext.classList.add('hidden');
-            btnSubmit.classList.remove('hidden');
-        } else {
-            btnNext.classList.remove('hidden');
-            btnSubmit.classList.add('hidden');
-        }
-
-        btnPrev.onclick = () => {
-            if (appState.currentQuestionIndex > 0) {
-                appState.currentQuestionIndex--;
-                renderQuestion();
-            }
-        };
-
-        btnNext.onclick = () => {
-            if (appState.currentQuestionIndex < appState.questions.length - 1) {
-                appState.currentQuestionIndex++;
-                renderQuestion();
-            }
-        };
-
-        btnSubmit.onclick = calculateResults;
-
-        if (window.MathJax) {
-            MathJax.typesetPromise();
-        }
-
-        // Save on every question render so reload can restore mid-quiz
-        saveAppState();
-    }
-
-    function selectOption(optText, index) {
-        appState.userAnswers[appState.currentQuestionIndex] = optText;
-        renderQuestion();
-    }
-
-    // --- Results with Topic-wise Strength/Weakness ---
-    function calculateResults() {
-        let score = 0;
-        let correctCount = 0;
-        let wrongCount = 0;
-        const total = appState.questions.length;
-
-        const reviewList = document.getElementById('review-list');
-        reviewList.innerHTML = '';
-
-        // Topic-wise stats object
-        const topicStats = {};
-
-        appState.questions.forEach((q, index) => {
-            const userAns = appState.userAnswers[index];
-            const correctAns = q.answer;
-            const topic = q._topic || 'Misc';
-
-            if (!topicStats[topic]) {
-                topicStats[topic] = {
-                    total: 0,
-                    correct: 0,
-                    wrong: 0,
-                    unattempted: 0,
-                    accuracy: 0,
-                    level: ''
-                };
-            }
-
-            const t = topicStats[topic];
-            t.total += 1;
-
-            const isUnattempted = userAns == null || userAns === '' || userAns === undefined;
-            const isCorrect = !isUnattempted && userAns === correctAns;
-
-            if (isUnattempted) {
-                t.unattempted += 1;
-            } else if (isCorrect) {
-                score++;
-                correctCount++;
-                t.correct += 1;
-            } else {
-                wrongCount++;
-                t.wrong += 1;
-            }
-
-            const reviewItem = document.createElement('div');
-            reviewItem.className = `review-item ${isCorrect ? 'correct' : 'wrong'}`;
-            reviewItem.innerHTML = `
-            <p><strong>Q${index + 1}:</strong> ${q.question || q.statement}</p>
-            <div class="ans-row">
-                <span class="${isCorrect ? 'text-green' : 'text-red'}">
-                    Your Answer: ${userAns || 'Not Attempted'}
-                </span>
-            </div>
-            ${!isCorrect ? `<div class="ans-row"><span class="text-green">Correct Answer: ${correctAns}</span></div>` : ''}
-            <div class="ans-row"><small class="text-muted">Topic: ${topic}</small></div>
-            ${q.explanation ? `<div class="ans-row" style="margin-top:0.5rem; font-style:italic; font-size:0.9rem; color:#64748b;">💡 Explanation: ${q.explanation}</div>` : ''}
-        `;
-            reviewList.appendChild(reviewItem);
-        });
-
-        Object.keys(topicStats).forEach(topic => {
-            const t = topicStats[topic];
-            t.accuracy = t.total > 0 ? Math.round((t.correct / t.total) * 100) : 0;
-
-            if (t.accuracy >= 80) {
-                t.level = 'Strong';
-            } else if (t.accuracy >= 50) {
-                t.level = 'Needs Practice';
-            } else {
-                t.level = 'Weak';
-            }
-        });
-
-        document.getElementById('score-text').textContent = `${score}/${total}`;
-        document.getElementById('stat-correct').textContent = correctCount;
-        document.getElementById('stat-wrong').textContent = wrongCount;
-
-        renderTopicStats(topicStats);
-
-        app.showScreen('screen-result');
-
-        if (window.MathJax) {
-            MathJax.typesetPromise([document.getElementById('review-list')]);
-        }
-
-        saveAppState();
-    }
-
-    function renderTopicStats(topicStats) {
-        const container = document.getElementById('topic-stats');
-        if (!container) return;
-
-        container.innerHTML = '';
-
-        const topics = Object.keys(topicStats);
-        if (topics.length === 0) {
-            container.textContent = 'No topic data available.';
-            return;
-        }
-
-        topics.forEach(topic => {
-            const {
-                total,
-                correct,
-                wrong,
-                unattempted,
-                accuracy,
-                level
-            } = topicStats[topic];
-
-            let levelClass = '';
-            if (level === 'Strong') levelClass = 'text-green';
-            if (level === 'Weak') levelClass = 'text-red';
-
-            const row = document.createElement('div');
-            row.style.display = 'flex';
-            row.style.justifyContent = 'space-between';
-            row.style.alignItems = 'center';
-            row.style.padding = '0.5rem 0';
-            row.style.borderBottom = '1px solid var(--border)';
-
-            row.innerHTML = `
-            <div>
-                <strong>${topic}</strong>
-                <div style="font-size:0.8rem; color:var(--text-muted);">
-                    ${correct}/${total} correct,
-                    ${wrong} wrong,
-                    ${unattempted} unattempted
-                </div>
-            </div>
-            <div style="text-align:right;">
-                <div class="${levelClass}" style="font-weight:600;">${accuracy}%</div>
-                <div style="font-size:0.8rem; color:var(--text-muted);">${level}</div>
-            </div>
-        `;
-
-            container.appendChild(row);
-        });
-    }
-
-    // --- Theme Management ---
-    function initTheme() {
-        const toggle = document.getElementById('theme-toggle');
-        if (!toggle) return;
-
-        const savedTheme = localStorage.getItem('theme');
-        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-        if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
-            document.body.setAttribute('data-theme', 'dark');
-            document.getElementById('sun-icon').classList.remove('hidden');
-            document.getElementById('moon-icon').classList.add('hidden');
-        } else {
-            document.body.removeAttribute('data-theme');
-            document.getElementById('sun-icon').classList.add('hidden');
-            document.getElementById('moon-icon').classList.remove('hidden');
-        }
-
-        toggle.onclick = () => {
-            const isDark = document.body.getAttribute('data-theme') === 'dark';
-            if (isDark) {
-                document.body.removeAttribute('data-theme');
-                localStorage.setItem('theme', 'light');
-                document.getElementById('sun-icon').classList.add('hidden');
-                document.getElementById('moon-icon').classList.remove('hidden');
-            } else {
-                document.body.setAttribute('data-theme', 'dark');
-                localStorage.setItem('theme', 'dark');
-                document.getElementById('sun-icon').classList.remove('hidden');
-                document.getElementById('moon-icon').classList.add('hidden');
-            }
-        };
-    }
-    // --- Router / reload handling ---
-    function restoreOrBoot() {
-        const saved = loadSavedAppState();
-
-        // Always build subjects, it's the root
-        loadSubjects();
-
-        if (!saved) {
-            app.showScreen('screen-subjects', { skipHistory: true });
-            return;
-        }
-
-        // Restore state object
-        appState.subject = saved.subject || null;
-        appState.year = saved.year || null;
-        appState.subtopics = saved.subtopics || [];
-        appState.questions = saved.questions || [];
-        appState.currentQuestionIndex = saved.currentQuestionIndex || 0;
-        appState.userAnswers = saved.userAnswers || {};
-        appState.topicMap = saved.topicMap || null;
-        appState.currentScreen = saved.currentScreen || 'screen-subjects';
-
-        // **ROBUST RESTORE LOGIC**
-        
-        // 1. If we have a subject saved, re-run selectSubject logic to populate Years Grid 
-        //    (This ensures the "Back" button works if we are deep in the app)
-        if (appState.subject) {
-             // We do this manually to avoid triggering the 'showScreen' inside selectSubject 
-             // which might conflict with where we actually want to go.
-             // Re-setting the header:
-             const title = appState.subject.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-             document.getElementById('selected-subject-title').textContent = title;
-             
-             // Re-populating the grid:
-             const years = QUIZ_TREE[appState.subject] || [];
-             const grid = document.getElementById('year-grid');
-             grid.innerHTML = '';
-             years.forEach(year => {
-                const btn = document.createElement('div');
-                btn.className = 'card-btn';
-                btn.textContent = year;
-                btn.onclick = () => selectYear(appState.subject, `${year}.json`);
-                grid.appendChild(btn);
-            });
-        }
-
-        // 2. Decide which screen to actually show
-        const screen = appState.currentScreen;
-
-        if (screen === 'screen-years') {
-            app.showScreen('screen-years', { skipHistory: true });
-        } 
-        else if (screen === 'screen-subtopics') {
-            if (appState.topicMap) {
-                const subtopics = Object.keys(appState.topicMap);
-                renderSubtopics(subtopics);
-                app.showScreen('screen-subtopics', { skipHistory: true });
-            } else {
-                // Fallback if data missing
-                app.showScreen('screen-subjects', { skipHistory: true });
-            }
-        } 
-        else if (screen === 'screen-quiz') {
-            if (appState.questions && appState.questions.length > 0) {
-                // Determine if we also need to populate subtopics (for back button)
-                if (appState.topicMap) {
-                    renderSubtopics(Object.keys(appState.topicMap));
-                }
-                app.showScreen('screen-quiz', { skipHistory: true });
-                renderQuestion();
-            } else {
-                app.showScreen('screen-subjects', { skipHistory: true });
-            }
-        } 
-        else if (screen === 'screen-result') {
-            if (appState.questions && appState.questions.length > 0) {
-                calculateResults();
-            } else {
-                app.showScreen('screen-subjects', { skipHistory: true });
-            }
-        } 
-        else {
-            app.showScreen('screen-subjects', { skipHistory: true });
-        }
-    }
-
-    function initRouter() {
-        window.addEventListener('popstate', (event) => {
-            const state = event.state;
-            if (state && state.screenId) {
-                const screenId = state.screenId;
-                app.showScreen(screenId, {
-                    skipHistory: true
-                });
-
-                if (screenId === 'screen-quiz') {
-                    renderQuestion();
-                } else if (screenId === 'screen-result') {
-                    calculateResults();
-                }
-            } else {
-                app.showScreen('screen-subjects', {
-                    skipHistory: true
-                });
-            }
-        });
-    }
-    // --- INITIALIZATION ---
-    initTheme();
-    restoreOrBoot();
-    initRouter();
-
-</script>
-
-</body>
+    <script src="script.js"></script>
+  </body>
 </html>
