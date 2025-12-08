@@ -207,7 +207,7 @@ const appState = {
   currentQuestionIndex: 0,
   userAnswers: {},
   topicMap: null,
-  _resultsComputed: false
+  _resultsComputed: false,
 };
 
 // **FIXED: Correct variable name used throughout functions**
@@ -216,6 +216,7 @@ const APP_STATE_STORAGE_KEY = "cdsQuizStateV1";
 // --- DOM Elements ---
 const screens = {
   subjects: document.getElementById("screen-subjects"),
+  random: document.getElementById("screen-random-config"),
   years: document.getElementById("screen-years"),
   subtopics: document.getElementById("screen-subtopics"),
   quiz: document.getElementById("screen-quiz"),
@@ -296,8 +297,14 @@ const app = {
 
   showLoader: (msg = "Loading...") => {
     document.getElementById("loader-text").textContent = msg;
+
+    Object.values(screens).forEach((s) =>
+      s.classList.remove("active", "hidden")
+    );
     Object.values(screens).forEach((s) => s.classList.add("hidden"));
+
     screens.loader.classList.remove("hidden");
+    screens.loader.classList.add("active");
   },
 
   showError: (msg) => {
@@ -309,14 +316,20 @@ const app = {
 
   goBack: () => {
     if (appState.currentScreen === "screen-years") {
-      app.showScreen("screen-subjects");
-    } else if (appState.currentScreen === "screen-subtopics") {
-      app.showScreen("screen-years");
-    } else if (appState.currentScreen === "screen-quiz") {
-      app.showScreen("screen-subtopics");
-    }else if (appState.currentScreen === "screen-result") {
-      app.showScreen("screen-subjects");
-    }
+    app.showScreen("screen-subjects");
+
+  } else if (appState.currentScreen === "screen-subtopics") {
+    app.showScreen("screen-years");
+
+  } else if (appState.currentScreen === "screen-quiz") {
+    app.showScreen("screen-subtopics");
+
+  } else if (appState.currentScreen === "screen-result") {
+    app.showScreen("screen-subjects");
+
+  } else if (appState.currentScreen === "screen-random-config") {
+    app.showScreen("screen-subjects"); // ✅ FIX
+  }
   },
 
   goHome: () => {
@@ -357,6 +370,15 @@ function loadSubjects() {
     btn.onclick = () => selectSubject(subName);
     grid.appendChild(btn);
   });
+
+  // Random Quiz Card
+  const randomBtn = document.createElement("div");
+  randomBtn.className = "card-btn";
+  randomBtn.textContent = "🎯 Take Random GK Quiz";
+  randomBtn.onclick = () => {
+    app.showScreen("screen-random-config");
+    loadRandomGKSubjects();
+  };
 
   // Don't auto-show here, restoreOrBoot handles showing the correct screen
 }
@@ -434,6 +456,102 @@ async function selectYear(subject, filename) {
   }
 }
 
+// Load Subjects for Random Mode
+function loadRandomGKSubjects() {
+  const container = document.getElementById("random-subjects");
+  if (!container || container.children.length > 0) return;
+  container.innerHTML = "";
+
+  GK_SUBJECTS.forEach((subject) => {
+    const label = document.createElement("label");
+    label.className = "checkbox-item";
+    label.innerHTML = `
+      <input type="checkbox" value="${subject}" checked>
+      <span>${subject
+        .replace("_", " ")
+        .replace(/\b\w/g, (c) => c.toUpperCase())}</span>
+    `;
+    container.appendChild(label);
+  });
+}
+
+async function buildRandomGKQuiz() {
+  const selectedSubjects = Array.from(
+    document.querySelectorAll("#random-subjects input:checked")
+  ).map((cb) => cb.value);
+
+  const totalQuestions = parseInt(
+    document.getElementById("random-q-count").value
+  );
+
+  if (isNaN(totalQuestions) || totalQuestions < 5) {
+    totalQuestions = 20;
+  }
+
+  if (totalQuestions > 200) {
+    totalQuestions = 200;
+  }
+
+  if (selectedSubjects.length === 0) {
+    alert("Select at least one subject");
+    return;
+  }
+
+  app.showLoader("Building Random GK Quiz...");
+
+  let allQuestions = [];
+  let loadedCount = 0;
+
+  for (const subject of selectedSubjects) {
+    updateLoaderText(`Loading ${subject.replace("_", " ")} questions...`);
+
+    const years = QUIZ_TREE[subject] || [];
+
+    for (const year of years) {
+      const url = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${subject}/${year}.json`;
+
+      try {
+        const res = await fetch(url);
+        const json = await res.json();
+
+        const topicMap = json.subtopics || json.topics || json;
+
+        Object.entries(topicMap).forEach(([topicName, qArr]) => {
+          qArr.forEach((q) => {
+            allQuestions.push({
+              ...q,
+              _subject: subject,
+              _topic: topicName,
+            });
+            loadedCount++;
+          });
+        });
+      } catch (e) {
+        console.warn(`Failed ${subject} ${year}`);
+      }
+    }
+  }
+
+  updateLoaderText("Finalizing your quiz...");
+  // 🔀 Shuffle
+  allQuestions.sort(() => Math.random() - 0.5);
+
+  const finalQuestions = pickRandomQuestions(allQuestions, totalQuestions);
+
+  if (finalQuestions.length === 0) {
+    app.showError("No questions found for selection.");
+    return;
+  }
+
+  startQuizEngine(finalQuestions);
+}
+
+// --- Loader Helpers ---
+function updateLoaderText(msg) {
+  const el = document.getElementById("loader-text");
+  if (el) el.textContent = msg;
+}
+
 // --- Subtopic Rendering ---
 function renderSubtopics(topicList) {
   const list = document.getElementById("subtopic-list");
@@ -484,13 +602,38 @@ function generateQuizFromSelection() {
   startQuizEngine(quizQuestions);
 }
 
+// --- Random GK Helpers ---
+function pickRandomQuestions(allQuestions, limit) {
+  const byTopic = {};
+
+  allQuestions.forEach((q) => {
+    if (!byTopic[q._topic]) byTopic[q._topic] = [];
+    byTopic[q._topic].push(q);
+  });
+
+  const topics = Object.keys(byTopic).sort(() => Math.random() - 0.5);
+
+  const result = [];
+
+  while (result.length < limit && topics.length) {
+    for (let t of topics) {
+      if (byTopic[t].length && result.length < limit) {
+        const idx = Math.floor(Math.random() * byTopic[t].length);
+        result.push(byTopic[t].splice(idx, 1)[0]);
+      }
+    }
+  }
+
+  return result;
+}
+
 // --- Quiz Engine ---
 function startQuizEngine(questions) {
   appState.questions = questions;
   appState.currentQuestionIndex = 0;
   appState.userAnswers = {};
 
-  appState._resultsComputed = false; 
+  appState._resultsComputed = false;
 
   app.showScreen("screen-quiz");
   renderQuestion();
@@ -727,6 +870,16 @@ function renderTopicStats(topicStats) {
   });
 }
 
+//  ---Random GK quiz helper---
+const GK_SUBJECTS = [
+  "history",
+  "polity",
+  "geography",
+  "economics",
+  "science",
+  "computer_science",
+];
+
 // --- Theme Management ---
 function initTheme() {
   const toggle = document.getElementById("theme-toggle");
@@ -825,6 +978,9 @@ function restoreOrBoot() {
       // Fallback if data missing
       app.showScreen("screen-subjects", { skipHistory: true });
     }
+  } else if (screen === "screen-random-config") {
+    loadRandomGKSubjects();
+    app.showScreen("screen-random-config", { skipHistory: true });
   } else if (screen === "screen-quiz") {
     if (appState.questions && appState.questions.length > 0) {
       // Determine if we also need to populate subtopics (for back button)
@@ -848,6 +1004,24 @@ function restoreOrBoot() {
     app.showScreen("screen-subjects", { skipHistory: true });
   }
 }
+
+function initRandomGK() {
+  const btn = document.getElementById("start-random");
+  if (!btn) return;
+
+  btn.onclick = buildRandomGKQuiz;
+}
+
+function initRandomQuizButton() {
+  const btn = document.getElementById("random-quiz-btn");
+  if (!btn) return;
+
+  btn.onclick = () => {
+    app.showScreen("screen-random-config");
+    loadRandomGKSubjects();
+  };
+}
+
 
 function initRouter() {
   window.addEventListener("popstate", (event) => {
@@ -874,3 +1048,6 @@ function initRouter() {
 initTheme();
 restoreOrBoot();
 initRouter();
+initRandomGK();
+initRandomQuizButton();
+

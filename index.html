@@ -108,6 +108,45 @@
           <p>Choose a subject to practice PYQs</p>
         </div>
         <div id="subject-grid" class="grid-container"></div>
+        <div class="random-quiz-section">
+          <div id="random-quiz-btn" class="card-btn random-card">
+            🎯 Take Random GK Quiz
+          </div>
+        </div>
+      </div>
+
+      <div id="screen-random-config" class="screen hidden">
+        <button class="btn-back" onclick="app.goBack()">← Back</button>
+
+        <div class="header-section">
+          <h1>Random GK Quiz</h1>
+          <p>Select subjects, topics, and number of questions</p>
+        </div>
+
+        <!-- Subjects -->
+        <div class="config-card">
+          <h3>Select Subjects</h3>
+          <div class="checkbox-list" id="random-subjects"></div>
+
+          <div class="number-input">
+            <label for="random-q-count">Number of Questions</label>
+            <input
+              type="number"
+              id="random-q-count"
+              min="5"
+              max="100"
+              step="5"
+              value="20"
+            />
+            <small class="text-muted">
+              Recommended: 20–30 for focused practice
+            </small>
+          </div>
+
+          <button class="btn btn-primary btn-large" id="start-random">
+            Start Random Quiz
+          </button>
+        </div>
       </div>
 
       <div id="screen-years" class="screen hidden">

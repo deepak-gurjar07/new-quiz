@@ -150,6 +150,11 @@
             color: var(--primary);
         }
 
+        /* Only normal cards change text color on hover */
+        .card-btn:not(.random-card):hover {
+            color: var(--primary);
+        }
+
         .btn {
             padding: 0.75rem 1.5rem;
             border: none;
@@ -237,6 +242,58 @@
             accent-color: var(--primary);
             transform: scale(1.2);
         }
+
+        .number-input {
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .number-input label {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .number-input input {
+            padding: 0.6rem 0.75rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 1rem;
+            background: var(--bg-card);
+            color: var(--text-main);
+        }
+
+        .number-input input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .random-quiz-section {
+            margin-top: 2.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px dashed var(--border);
+            display: flex;
+            justify-content: center;
+        }
+
+        .random-card {
+            max-width: 320px;
+            width: 100%;
+            background: linear-gradient(135deg,
+                    var(--primary),
+                    var(--primary-hover));
+            color: white;
+            font-weight: 700;
+        }
+
+        /* ✅ override says "stay white" */
+        .random-card:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            color: white;
+        }
+
 
         /* Quiz Interface */
         .progress-wrapper {
