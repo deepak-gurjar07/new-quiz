@@ -112,6 +112,10 @@
           <div id="random-quiz-btn" class="card-btn random-card">
             🎯 Take Random GK Quiz
           </div>
+
+          <div id="random-maths-btn" class="card-btn random-card maths-card">
+            📐 Random Maths Quiz
+          </div>
         </div>
       </div>
 
@@ -143,8 +147,49 @@
             </small>
           </div>
 
+          <label class="checkbox-item" style="margin-top: 1rem">
+            <input type="checkbox" id="neg-marking-toggle" checked />
+            <span>Apply negative marking (−0.33 for wrong answers)</span>
+          </label>
+
           <button class="btn btn-primary btn-large" id="start-random">
             Start Random Quiz
+          </button>
+        </div>
+      </div>
+
+      <div id="screen-random-maths" class="screen hidden">
+        <button class="btn-back" onclick="app.goBack()">← Back</button>
+
+        <div class="header-section">
+          <h1>Random Maths Quiz</h1>
+          <p>Mixed practice from all Maths topics</p>
+        </div>
+
+        <div class="config-card">
+          <h3>Select Topics</h3>
+          <div class="checkbox-list" id="random-maths-topics"></div>
+
+          <!-- reuse number input -->
+          <div class="number-input">
+            <label>Number of Questions</label>
+            <input
+              type="number"
+              id="random-maths-count"
+              value="20"
+              min="5"
+              step="5"
+            />
+          </div>
+
+          <!-- reuse negative marking -->
+          <label class="checkbox-item" style="margin-top: 1rem">
+            <input type="checkbox" id="maths-neg-toggle" checked />
+            <span>Apply negative marking (−0.33)</span>
+          </label>
+
+          <button class="btn btn-primary btn-large" id="start-random-maths">
+            Start Random Maths Quiz
           </button>
         </div>
       </div>
@@ -193,7 +238,17 @@
 
         <div class="quiz-footer">
           <button id="btn-prev" class="btn btn-outline hidden">Previous</button>
+
+          <button
+            id="btn-clear"
+            class="btn btn-outline"
+            title="Clear selected answer"
+          >
+            Clear Answer
+          </button>
+
           <button id="btn-next" class="btn btn-primary">Next Question</button>
+
           <button id="btn-submit" class="btn btn-secondary hidden">
             Submit Quiz
           </button>
@@ -207,12 +262,17 @@
             <span id="score-text">0</span>
             <small>Score</small>
           </div>
+          <p class="score-rule">
+            +1 for correct, −0.33 for wrong, 0 for unattempted
+          </p>
+
           <div class="stats-row">
             <div class="stat green">
               <span id="stat-correct">0</span> Correct
             </div>
             <div class="stat red"><span id="stat-wrong">0</span> Wrong</div>
           </div>
+
           <button
             onclick="clearSavedAppState(); location.reload()"
             class="btn btn-primary"

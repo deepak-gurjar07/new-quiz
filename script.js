@@ -7,6 +7,10 @@
 const REPO_OWNER = "deepak-gurjar07";
 const REPO_NAME = "cds-quiz";
 const BRANCH = "main";
+// --- Random GK Cache ---
+const GK_CACHE = {}; // in-memory cache
+
+const CACHE_PREFIX = "cds-gk-cache-v1"; // versioned for safety
 
 // --- CONFIGURATION: STATIC DATA MAP ---
 const QUIZ_TREE = {
@@ -208,6 +212,7 @@ const appState = {
   userAnswers: {},
   topicMap: null,
   _resultsComputed: false,
+  negativeMarking: true,
 };
 
 // **FIXED: Correct variable name used throughout functions**
@@ -217,6 +222,7 @@ const APP_STATE_STORAGE_KEY = "cdsQuizStateV1";
 const screens = {
   subjects: document.getElementById("screen-subjects"),
   random: document.getElementById("screen-random-config"),
+  randomMaths: document.getElementById("screen-random-maths"),
   years: document.getElementById("screen-years"),
   subtopics: document.getElementById("screen-subtopics"),
   quiz: document.getElementById("screen-quiz"),
@@ -316,20 +322,18 @@ const app = {
 
   goBack: () => {
     if (appState.currentScreen === "screen-years") {
-    app.showScreen("screen-subjects");
-
-  } else if (appState.currentScreen === "screen-subtopics") {
-    app.showScreen("screen-years");
-
-  } else if (appState.currentScreen === "screen-quiz") {
-    app.showScreen("screen-subtopics");
-
-  } else if (appState.currentScreen === "screen-result") {
-    app.showScreen("screen-subjects");
-
-  } else if (appState.currentScreen === "screen-random-config") {
-    app.showScreen("screen-subjects"); // ✅ FIX
-  }
+      app.showScreen("screen-subjects");
+    } else if (appState.currentScreen === "screen-subtopics") {
+      app.showScreen("screen-years");
+    } else if (appState.currentScreen === "screen-quiz") {
+      app.showScreen("screen-subtopics");
+    } else if (appState.currentScreen === "screen-result") {
+      app.showScreen("screen-subjects");
+    } else if (appState.currentScreen === "screen-random-config") {
+      app.showScreen("screen-subjects"); // ✅ FIX
+    }else if(appState.currentScreen === "screen-random-maths"){
+      app.showScreen("screen-subjects");
+    }
   },
 
   goHome: () => {
@@ -497,6 +501,9 @@ async function buildRandomGKQuiz() {
     return;
   }
 
+  const negToggle = document.getElementById("neg-marking-toggle");
+  appState.negativeMarking = negToggle ? negToggle.checked : true;
+
   app.showLoader("Building Random GK Quiz...");
 
   let allQuestions = [];
@@ -511,10 +518,22 @@ async function buildRandomGKQuiz() {
       const url = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${subject}/${year}.json`;
 
       try {
-        const res = await fetch(url);
-        const json = await res.json();
+        // ✅ Try cache first
+        let topicMap = getCachedGK(subject, year);
 
-        const topicMap = json.subtopics || json.topics || json;
+        if (!topicMap) {
+          updateLoaderText(`Fetching ${subject.replace("_", " ")} ${year}...`);
+
+          const res = await fetch(url);
+          const json = await res.json();
+
+          topicMap = json.subtopics || json.topics || json;
+
+          // ✅ Save to cache
+          setCachedGK(subject, year, topicMap);
+        } else {
+          updateLoaderText(`Using cached ${subject.replace("_", " ")} ${year}`);
+        }
 
         Object.entries(topicMap).forEach(([topicName, qArr]) => {
           qArr.forEach((q) => {
@@ -545,6 +564,158 @@ async function buildRandomGKQuiz() {
 
   startQuizEngine(finalQuestions);
 }
+
+async function loadRandomMathsTopics() {
+  const container = document.getElementById("random-maths-topics");
+  if (!container) return;
+
+  container.innerHTML = "";
+  app.showLoader("Loading Maths topics...");
+
+  const subject = "Mathematics"; // ✅ MUST match QUIZ_TREE key
+  const years = QUIZ_TREE[subject] || [];
+
+  if (years.length === 0) {
+    app.showError("No Maths data available.");
+    return;
+  }
+
+  const topicsSet = new Set();
+
+  // ✅ Go through ALL years
+  for (const year of years) {
+    const url = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${subject}/${year}.json`;
+
+    try {
+      let topicMap = getCachedGK(subject, year);
+
+      if (!topicMap) {
+        const res = await fetch(url);
+        const json = await res.json();
+        topicMap = json.subtopics || json.topics || json;
+        setCachedGK(subject, year, topicMap);
+      }
+
+      // ✅ Collect topics
+      Object.keys(topicMap).forEach(topic => {
+        topicsSet.add(topic);
+      });
+
+    } catch (e) {
+      console.warn(`Failed to load Maths ${year}`, e);
+    }
+  }
+
+  // ✅ If still empty, something truly wrong
+  if (topicsSet.size === 0) {
+    app.showError("No Maths topics found.");
+    return;
+  }
+
+  // ✅ Render sorted topics
+  Array.from(topicsSet)
+    .sort()
+    .forEach(topic => {
+      const label = document.createElement("label");
+      label.className = "checkbox-item";
+      label.innerHTML = `
+        <input type="checkbox" value="${topic}" checked>
+        <span>${topic}</span>
+      `;
+      container.appendChild(label);
+    });
+
+  // ✅ Now show the screen
+  app.showScreen("screen-random-maths");
+}
+
+
+async function buildRandomMathsQuiz() {
+  appState.quizMode = "random-maths";
+
+  // ✅ Read selected topics
+  const selectedTopics = Array.from(
+    document.querySelectorAll("#random-maths-topics input:checked")
+  ).map(cb => cb.value);
+
+  if (selectedTopics.length === 0) {
+    alert("Select at least one Maths topic");
+    return;
+  }
+
+  // ✅ Number of questions
+  let totalQuestions = parseInt(
+    document.getElementById("random-maths-count").value
+  );
+
+  if (isNaN(totalQuestions) || totalQuestions < 5) {
+    totalQuestions = 20;
+  }
+
+  // ✅ Negative marking toggle
+  const negToggle = document.getElementById("maths-neg-toggle");
+  appState.negativeMarking = negToggle ? negToggle.checked : true;
+
+  // ✅ Show loader
+  app.showLoader("Preparing Random Maths Quiz...");
+
+  const subject = "Mathematics";
+  const years = QUIZ_TREE[subject] || [];
+  let allQuestions = [];
+
+  // ✅ Fetch Maths questions (cached)
+  for (const year of years) {
+    updateLoaderText(`Loading Mathematics ${year}...`);
+
+    const url = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${subject}/${year}.json`;
+
+    try {
+      let topicMap = getCachedGK(subject, year);
+
+      if (!topicMap) {
+        const res = await fetch(url);
+        const json = await res.json();
+        topicMap = json.subtopics || json.topics || json;
+        setCachedGK(subject, year, topicMap);
+      }
+
+      // ✅ Extract only selected topics
+      Object.entries(topicMap).forEach(([topicName, qArr]) => {
+        if (!selectedTopics.includes(topicName)) return;
+
+        qArr.forEach((q) => {
+          allQuestions.push({
+            ...q,
+            _subject: "Mathematics",
+            _topic: topicName,
+          });
+        });
+      });
+    } catch (e) {
+      console.warn(`Failed Mathematics ${year}`, e);
+    }
+  }
+
+  if (allQuestions.length === 0) {
+    app.showError("No questions found for selected Maths topics.");
+    return;
+  }
+
+  // ✅ Shuffle
+  allQuestions.sort(() => Math.random() - 0.5);
+
+  // ✅ Pick balanced random set (reuse your helper)
+  const finalQuestions = pickRandomQuestions(
+    allQuestions,
+    totalQuestions
+  );
+
+  updateLoaderText("Finalizing your Maths quiz...");
+
+  // ✅ Start quiz
+  startQuizEngine(finalQuestions);
+}
+
 
 // --- Loader Helpers ---
 function updateLoaderText(msg) {
@@ -681,6 +852,20 @@ function renderQuestion() {
   const btnPrev = document.getElementById("btn-prev");
   const btnNext = document.getElementById("btn-next");
   const btnSubmit = document.getElementById("btn-submit");
+  const btnClear = document.getElementById("btn-clear");
+
+  // Show clear button only if something is selected
+  if (appState.userAnswers[appState.currentQuestionIndex] != null) {
+    btnClear.classList.remove("hidden");
+  } else {
+    btnClear.classList.add("hidden");
+  }
+
+  // Clear logic
+  btnClear.onclick = () => {
+    delete appState.userAnswers[appState.currentQuestionIndex];
+    renderQuestion();
+  };
 
   if (current === 1) {
     btnPrev.classList.add("hidden");
@@ -762,14 +947,18 @@ function calculateResults() {
     const isCorrect = !isUnattempted && userAns === correctAns;
 
     if (isUnattempted) {
-      t.unattempted += 1;
+      t.unattempted++;
     } else if (isCorrect) {
-      score++;
+      score += 1;
       correctCount++;
-      t.correct += 1;
+      t.correct++;
     } else {
       wrongCount++;
-      t.wrong += 1;
+      t.wrong++;
+
+      if (appState.negativeMarking) {
+        score -= 0.33;
+      }
     }
 
     const reviewItem = document.createElement("div");
@@ -808,6 +997,10 @@ function calculateResults() {
       t.level = "Weak";
     }
   });
+
+  // ✅ FORMAT FINAL SCORE (ADD HERE)
+  score = Math.max(0, score);
+  score = score.toFixed(2);
 
   document.getElementById("score-text").textContent = `${score}/${total}`;
   document.getElementById("stat-correct").textContent = correctCount;
@@ -870,6 +1063,39 @@ function renderTopicStats(topicStats) {
   });
 }
 
+function getCacheKey(subject, year) {
+  return `${CACHE_PREFIX}-${subject}-${year}`;
+}
+
+function getCachedGK(subject, year) {
+  const memKey = `${subject}-${year}`;
+  if (GK_CACHE[memKey]) return GK_CACHE[memKey];
+
+  const localKey = getCacheKey(subject, year);
+  const raw = localStorage.getItem(localKey);
+  if (!raw) return null;
+
+  try {
+    const parsed = JSON.parse(raw);
+    GK_CACHE[memKey] = parsed; // hydrate memory
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function setCachedGK(subject, year, data) {
+  const memKey = `${subject}-${year}`;
+  const localKey = getCacheKey(subject, year);
+
+  GK_CACHE[memKey] = data;
+  try {
+    localStorage.setItem(localKey, JSON.stringify(data));
+  } catch {
+    // storage full → silently ignore
+  }
+}
+
 //  ---Random GK quiz helper---
 const GK_SUBJECTS = [
   "history",
@@ -879,6 +1105,8 @@ const GK_SUBJECTS = [
   "science",
   "computer_science",
 ];
+
+const MATHS_SUBJECT = "Mathematics";
 
 // --- Theme Management ---
 function initTheme() {
@@ -1022,6 +1250,26 @@ function initRandomQuizButton() {
   };
 }
 
+function initRandomMathsButton() {
+  const btn = document.getElementById("random-maths-btn");
+  if (!btn) return;
+
+  btn.onclick = () => {
+    loadRandomMathsTopics();
+  };
+}
+
+function initRandomMathsStart() {
+  const btn = document.getElementById("start-random-maths");
+  if (!btn) return;
+
+  btn.onclick = () => {
+    console.log("✅ Start Random Maths clicked");
+    buildRandomMathsQuiz();
+  };
+}
+
+
 
 function initRouter() {
   window.addEventListener("popstate", (event) => {
@@ -1050,4 +1298,6 @@ restoreOrBoot();
 initRouter();
 initRandomGK();
 initRandomQuizButton();
+initRandomMathsButton();
+initRandomMathsStart();
 

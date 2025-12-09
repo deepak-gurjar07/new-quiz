@@ -294,6 +294,15 @@
             color: white;
         }
 
+        .maths-card {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        }
+
+        .maths-card:hover {
+            color: white;
+        }
+
+
 
         /* Quiz Interface */
         .progress-wrapper {
@@ -386,6 +395,15 @@
             align-items: center;
             margin: 2rem auto;
         }
+
+        .score-rule {
+            margin-top: -0.8rem;
+            margin-bottom: 1.2rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
 
         #score-text {
             font-size: 2.5rem;
