@@ -1,204 +1,55 @@
 /**
  * CDS PYQ Quiz Platform
- * Single File Version for Sandbox Compatibility
- * FEATURES: MathJax, HTML Parsing, Back Button, Home Button, Prev Button, State Persistence
  */
 
 const REPO_OWNER = "deepak-gurjar07";
-const REPO_NAME = "cds-quiz";
+const REPO_NAME = "cds-pyq-json"; 
 const BRANCH = "main";
+
 // --- Random GK Cache ---
 const GK_CACHE = {}; // in-memory cache
+const CACHE_PREFIX = "cds-gk-cache-v1"; 
 
-const CACHE_PREFIX = "cds-gk-cache-v1"; // versioned for safety
-
-// --- CONFIGURATION: STATIC DATA MAP ---
+// --- CONFIGURATION: DYNAMIC DATA MAP BASED ON UPLOADED FILES ---
 const QUIZ_TREE = {
-  computer_science: ["2025-I"],
-  economics: [
-    "2007-II",
-    "2008-I",
-    "2008-II",
-    "2011-II",
-    "2012-I",
-    "2012-II",
-    "2013-I",
-    "2013-II",
-    "2014-I",
-    "2014-II",
-    "2015-I",
-    "2015-II",
-    "2016-I",
-    "2016-II",
-    "2017-I",
-    "2017-II",
-    "2018-I",
-    "2018-II",
-    "2019-I",
-    "2019-II",
-    "2020-I",
-    "2025-I",
+  Biology: [
+    "2007-I", "2007-II", "2008-I", "2008-II", "2009-I", "2009-II", "2010-I", "2010-II",
+    "2011-I", "2011-II", "2013-II", "2014-I", "2014-II", "2015-I", "2015-II",
+    "2016-I", "2016-II", "2017-I", "2017-II", "2018-I", "2018-II", "2019-I", "2019-II",
+    "2020-I", "Unknown-I"
   ],
-  geography: [
-    "2007-I",
-    "2007-II",
-    "2008-I",
-    "2008-II",
-    "2009-I",
-    "2009-II",
-    "2010-I",
-    "2010-II",
-    "2011-I",
-    "2011-II",
-    "2012-I",
-    "2012-II",
-    "2013-I",
-    "2013-II",
-    "2014-I",
-    "2014-II",
-    "2015-I",
-    "2015-II",
-    "2016-I",
-    "2016-II",
-    "2017-I",
-    "2017-II",
-    "2018-1",
-    "2018-II",
-    "2019-I",
-    "2019-II",
-    "2020-I",
-    "2024-II",
-    "2025-I",
+  Chemistry: [
+    "2007-II", "2008-I", "2008-II", "2009-I", "2009-II", "2010-I", "2010-II",
+    "2011-I", "2011-II", "2012-I", "2012-II", "2013-I", "2013-II", "2014-II",
+    "2015-I", "2015-II", "2016-I", "2016-II", "2017-I", "2017-II", "2018-I", "2018-II",
+    "2019-I", "2019-II", "2020-I", "Unknown-I"
   ],
-  history: [
-    "2007-II",
-    "2008-I",
-    "2008-II",
-    "2009-I",
-    "2009-II",
-    "2010-I",
-    "2010-II",
-    "2011-I",
-    "2011-II",
-    "2012-I",
-    "2012-II",
-    "2013-I",
-    "2013-II",
-    "2014-I",
-    "2014-II",
-    "2015-I",
-    "2015-II",
-    "2016-I",
-    "2016-II",
-    "2017-I",
-    "2017-II",
-    "2018-I",
-    "2018-II",
-    "2019-I",
-    "2019-II",
-    "2020-I",
-    "2024-II",
-    "2025-I",
+  Economy: [
+    "2016-II", "Unknown-I"
   ],
-  polity: [
-    "2007-I",
-    "2007-II",
-    "2008-I",
-    "2008-II",
-    "2009-I",
-    "2009-II",
-    "2010-I",
-    "2010-II",
-    "2011-I",
-    "2012-I",
-    "2012-II",
-    "2013-I",
-    "2013-II",
-    "2014-I",
-    "2014-II",
-    "2015-I",
-    "2015-II",
-    "2016-I",
-    "2016-II",
-    "2017-I",
-    "2017-II",
-    "2018-I",
-    "2018-II",
-    "2019-I",
-    "2019-II",
-    "2020-I",
-    "2024-II",
-    "2025-I",
+  General_Knowledge: [
+    "2007-II", "2008-I", "2008-II", "2011-II", "2012-I", "2012-II", "2013-I", "2013-II",
+    "2014-I", "2014-II", "2015-I", "2015-II", "2016-I", "2016-II", "2017-I",
+    "2018-I", "2018-II", "2019-I", "2019-II", "2020-I", "Unknown-I"
   ],
-  science: [
-    "2007-I",
-    "2007-II",
-    "2008-I",
-    "2008-II",
-    "2009-I",
-    "2009-II",
-    "2010-I",
-    "2010-II",
-    "2011-I",
-    "2011-II",
-    "2012-I",
-    "2012-II",
-    "2013-I",
-    "2013-II",
-    "2014-I",
-    "2014-II",
-    "2015-I",
-    "2015-II",
-    "2016-I",
-    "2016-II",
-    "2017-I",
-    "2017-II",
-    "2018-I",
-    "2018-II",
-    "2019-I",
-    "2019-II",
-    "2020-I",
-    "2020-II",
-    "2025-I",
+  Geography: [
+    "2007-I", "2007-II", "2008-I", "2008-II", "2009-I", "2009-II", "2010-I", "2010-II",
+    "2011-I", "2011-II", "2012-I", "2012-II", "2013-I", "2013-II", "2014-I", "2014-II",
+    "2015-I", "2015-II", "2016-I", "2016-II", "2017-I", "Unknown-I", "unknown-II"
   ],
-  Mathematics: [
-    "2007-I",
-    "2007-II",
-    "2008-I",
-    "2008-II",
-    "2009-I",
-    "2009-II",
-    "2010-I",
-    "2010-II",
-    "2011-I",
-    "2011-II",
-    "2012-I",
-    "2012-II",
-    "2013-I",
-    "2013-II",
-    "2014-I",
-    "2014-II",
-    "2015-I",
-    "2015-II",
-    "2016-I",
-    "2016-II",
-    "2017-I",
-    "2017-II",
-    "2018-I",
-    "2018-II",
-    "2019-I",
-    "2019-II",
-    "2020-I",
-    "2020-II",
-    "2021-I",
-    "2021-II",
-    "2022-I",
-    "2022-II",
-    "2023-I",
-    "2023-II",
-    "2024-I",
-    "2024-II",
+  History: [
+    "2007-II", "2008-I", "2008-II", "2009-I", "2009-II", "2010-I", "2010-II",
+    "2011-I", "2011-II", "2012-I", "2012-II", "2013-I", "2013-II", "2014-I", "2014-II",
+    "2015-I", "2015-II", "2016-I", "2016-II", "2017-I", "Unknown-I"
   ],
+  Miscellaneous: [
+    "Unknown-I"
+  ],
+  Physics: [
+    "2007-II", "2008-II", "2009-I", "2009-II", "2010-I", "2010-II", "2011-I", "2011-II",
+    "2013-II", "2014-I", "2014-II", "2015-I", "2015-II", "2016-I", "2016-II",
+    "2017-I", "2017-II", "Unknown-I"
+  ]
 };
 
 // --- App State ---
@@ -215,14 +66,13 @@ const appState = {
   negativeMarking: true,
 };
 
-// **FIXED: Correct variable name used throughout functions**
-const APP_STATE_STORAGE_KEY = "cdsQuizStateV1";
+const APP_STATE_STORAGE_KEY = "cdsQuizStateV2"; // Bumped version
 
 // --- DOM Elements ---
 const screens = {
   subjects: document.getElementById("screen-subjects"),
   random: document.getElementById("screen-random-config"),
-  randomMaths: document.getElementById("screen-random-maths"),
+  // randomMaths: document.getElementById("screen-random-maths"), // Removed
   years: document.getElementById("screen-years"),
   subtopics: document.getElementById("screen-subtopics"),
   quiz: document.getElementById("screen-quiz"),
@@ -272,11 +122,11 @@ function clearSavedAppState() {
 // --- Navigation Logic ---
 const app = {
   showScreen: (screenId, options = {}) => {
-    Object.values(screens).forEach((s) =>
-      s.classList.remove("active", "hidden")
-    );
     Object.values(screens).forEach((s) => {
-      if (s.id !== screenId) s.classList.add("hidden");
+        if(s) s.classList.remove("active", "hidden");
+    });
+    Object.values(screens).forEach((s) => {
+      if (s && s.id !== screenId) s.classList.add("hidden");
     });
 
     const el = document.getElementById(screenId);
@@ -285,16 +135,10 @@ const app = {
     el.classList.add("active");
     appState.currentScreen = screenId;
 
-    // History integration for browser back button
+    // History integration
     if (!options.skipHistory) {
       try {
-        history.pushState(
-          {
-            screenId,
-          },
-          "",
-          "#" + screenId
-        );
+        history.pushState({ screenId }, "", "#" + screenId);
       } catch (_) {}
     }
     appState._resultsComputed = true;
@@ -304,10 +148,12 @@ const app = {
   showLoader: (msg = "Loading...") => {
     document.getElementById("loader-text").textContent = msg;
 
-    Object.values(screens).forEach((s) =>
-      s.classList.remove("active", "hidden")
-    );
-    Object.values(screens).forEach((s) => s.classList.add("hidden"));
+    Object.values(screens).forEach((s) => {
+        if(s) s.classList.remove("active", "hidden");
+    });
+    Object.values(screens).forEach((s) => {
+        if(s) s.classList.add("hidden")
+    });
 
     screens.loader.classList.remove("hidden");
     screens.loader.classList.add("active");
@@ -315,7 +161,9 @@ const app = {
 
   showError: (msg) => {
     document.getElementById("error-message").textContent = msg;
-    Object.values(screens).forEach((s) => s.classList.add("hidden"));
+    Object.values(screens).forEach((s) => {
+        if(s) s.classList.add("hidden")
+    });
     screens.error.classList.remove("hidden");
     screens.error.classList.add("active");
   },
@@ -330,8 +178,6 @@ const app = {
     } else if (appState.currentScreen === "screen-result") {
       app.showScreen("screen-subjects");
     } else if (appState.currentScreen === "screen-random-config") {
-      app.showScreen("screen-subjects"); // ✅ FIX
-    }else if(appState.currentScreen === "screen-random-maths"){
       app.showScreen("screen-subjects");
     }
   },
@@ -344,11 +190,7 @@ const app = {
   },
 
   quitQuiz: () => {
-    if (
-      confirm(
-        "Are you sure you want to quit the quiz? Your progress will be lost."
-      )
-    ) {
+    if (confirm("Are you sure you want to quit the quiz? Your progress will be lost.")) {
       app.showScreen("screen-subtopics");
     }
   },
@@ -363,10 +205,8 @@ function loadSubjects() {
   const subjects = Object.keys(QUIZ_TREE);
 
   subjects.forEach((subName) => {
-    const displayName = subName
-      .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
+    // Replace underscores with spaces for display
+    const displayName = subName.replace(/_/g, " ");
 
     const btn = document.createElement("div");
     btn.className = "card-btn";
@@ -374,43 +214,28 @@ function loadSubjects() {
     btn.onclick = () => selectSubject(subName);
     grid.appendChild(btn);
   });
-
-  // Random Quiz Card
-  const randomBtn = document.createElement("div");
-  randomBtn.className = "card-btn";
-  randomBtn.textContent = "🎯 Take Random GK Quiz";
-  randomBtn.onclick = () => {
-    app.showScreen("screen-random-config");
-    loadRandomGKSubjects();
-  };
-
-  // Don't auto-show here, restoreOrBoot handles showing the correct screen
+  
+  // Note: Random Quiz buttons are in HTML
 }
 
 // --- 2. Load Years ---
 function selectSubject(subjectName) {
   appState.subject = subjectName;
-  // Don't rely on localStorage 'lastSubject', use appState
-
-  const title = subjectName
-    .split("_")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
+  const title = subjectName.replace(/_/g, " ");
   document.getElementById("selected-subject-title").textContent = title;
 
   const years = QUIZ_TREE[subjectName] || [];
-
   const grid = document.getElementById("year-grid");
   grid.innerHTML = "";
 
   if (years.length === 0) {
-    grid.innerHTML =
-      '<p style="grid-column: 1/-1; text-align: center;">No papers added for this subject yet.</p>';
+    grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No papers added for this subject yet.</p>';
   } else {
     years.forEach((year) => {
       const btn = document.createElement("div");
       btn.className = "card-btn";
       btn.textContent = year;
+      // Ensure we append .json here
       btn.onclick = () => selectYear(subjectName, `${year}.json`);
       grid.appendChild(btn);
     });
@@ -421,6 +246,7 @@ function selectSubject(subjectName) {
 
 // --- 3. Fetch Full JSON & Extract Subtopics ---
 async function selectYear(subject, filename) {
+  // Construct URL for the new repo structure
   const rawUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${subject}/${filename}`;
   appState.year = filename.replace(".json", "");
 
@@ -439,6 +265,7 @@ async function selectYear(subject, filename) {
     } else if (json.topics) {
       finalMap = json.topics;
     } else {
+      // Handle the format {"Biology 2019-I": [...]}
       const keys = Object.keys(json);
       keys.forEach((key) => {
         if (Array.isArray(json[key])) {
@@ -454,9 +281,7 @@ async function selectYear(subject, filename) {
     app.showScreen("screen-subtopics");
   } catch (err) {
     console.error(err);
-    app.showError(
-      "Error parsing the question file. Check console for details."
-    );
+    app.showError("Error parsing the question file. Check console for details.");
   }
 }
 
@@ -471,9 +296,7 @@ function loadRandomGKSubjects() {
     label.className = "checkbox-item";
     label.innerHTML = `
       <input type="checkbox" value="${subject}" checked>
-      <span>${subject
-        .replace("_", " ")
-        .replace(/\b\w/g, (c) => c.toUpperCase())}</span>
+      <span>${subject.replace(/_/g, " ")}</span>
     `;
     container.appendChild(label);
   });
@@ -484,17 +307,9 @@ async function buildRandomGKQuiz() {
     document.querySelectorAll("#random-subjects input:checked")
   ).map((cb) => cb.value);
 
-  const totalQuestions = parseInt(
-    document.getElementById("random-q-count").value
-  );
-
-  if (isNaN(totalQuestions) || totalQuestions < 5) {
-    totalQuestions = 20;
-  }
-
-  if (totalQuestions > 200) {
-    totalQuestions = 200;
-  }
+  let totalQuestions = parseInt(document.getElementById("random-q-count").value);
+  if (isNaN(totalQuestions) || totalQuestions < 5) totalQuestions = 20;
+  if (totalQuestions > 200) totalQuestions = 200;
 
   if (selectedSubjects.length === 0) {
     alert("Select at least one subject");
@@ -510,51 +325,51 @@ async function buildRandomGKQuiz() {
   let loadedCount = 0;
 
   for (const subject of selectedSubjects) {
-    updateLoaderText(`Loading ${subject.replace("_", " ")} questions...`);
-
+    updateLoaderText(`Loading ${subject.replace(/_/g, " ")} questions...`);
     const years = QUIZ_TREE[subject] || [];
 
     for (const year of years) {
+      // Append .json as stored keys don't have it
       const url = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${subject}/${year}.json`;
 
       try {
-        // ✅ Try cache first
         let topicMap = getCachedGK(subject, year);
 
         if (!topicMap) {
-          updateLoaderText(`Fetching ${subject.replace("_", " ")} ${year}...`);
-
+          updateLoaderText(`Fetching ${subject.replace(/_/g, " ")} ${year}...`);
           const res = await fetch(url);
           const json = await res.json();
-
           topicMap = json.subtopics || json.topics || json;
-
-          // ✅ Save to cache
+          
+          // Handle root array wrap if necessary (for {"Subj 2019": []} format)
+          const keys = Object.keys(topicMap);
+           // If the JSON is directly just { "Key": [] }
+           // The cached data should be that map.
           setCachedGK(subject, year, topicMap);
         } else {
-          updateLoaderText(`Using cached ${subject.replace("_", " ")} ${year}`);
+          updateLoaderText(`Using cached ${subject.replace(/_/g, " ")} ${year}`);
         }
 
         Object.entries(topicMap).forEach(([topicName, qArr]) => {
-          qArr.forEach((q) => {
-            allQuestions.push({
-              ...q,
-              _subject: subject,
-              _topic: topicName,
-            });
-            loadedCount++;
-          });
+          if(Array.isArray(qArr)) {
+             qArr.forEach((q) => {
+              allQuestions.push({
+                ...q,
+                _subject: subject,
+                _topic: topicName,
+              });
+              loadedCount++;
+            }); 
+          }
         });
       } catch (e) {
-        console.warn(`Failed ${subject} ${year}`);
+        console.warn(`Failed ${subject} ${year}`, e);
       }
     }
   }
 
   updateLoaderText("Finalizing your quiz...");
-  // 🔀 Shuffle
   allQuestions.sort(() => Math.random() - 0.5);
-
   const finalQuestions = pickRandomQuestions(allQuestions, totalQuestions);
 
   if (finalQuestions.length === 0) {
@@ -564,158 +379,6 @@ async function buildRandomGKQuiz() {
 
   startQuizEngine(finalQuestions);
 }
-
-async function loadRandomMathsTopics() {
-  const container = document.getElementById("random-maths-topics");
-  if (!container) return;
-
-  container.innerHTML = "";
-  app.showLoader("Loading Maths topics...");
-
-  const subject = "Mathematics"; // ✅ MUST match QUIZ_TREE key
-  const years = QUIZ_TREE[subject] || [];
-
-  if (years.length === 0) {
-    app.showError("No Maths data available.");
-    return;
-  }
-
-  const topicsSet = new Set();
-
-  // ✅ Go through ALL years
-  for (const year of years) {
-    const url = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${subject}/${year}.json`;
-
-    try {
-      let topicMap = getCachedGK(subject, year);
-
-      if (!topicMap) {
-        const res = await fetch(url);
-        const json = await res.json();
-        topicMap = json.subtopics || json.topics || json;
-        setCachedGK(subject, year, topicMap);
-      }
-
-      // ✅ Collect topics
-      Object.keys(topicMap).forEach(topic => {
-        topicsSet.add(topic);
-      });
-
-    } catch (e) {
-      console.warn(`Failed to load Maths ${year}`, e);
-    }
-  }
-
-  // ✅ If still empty, something truly wrong
-  if (topicsSet.size === 0) {
-    app.showError("No Maths topics found.");
-    return;
-  }
-
-  // ✅ Render sorted topics
-  Array.from(topicsSet)
-    .sort()
-    .forEach(topic => {
-      const label = document.createElement("label");
-      label.className = "checkbox-item";
-      label.innerHTML = `
-        <input type="checkbox" value="${topic}" checked>
-        <span>${topic}</span>
-      `;
-      container.appendChild(label);
-    });
-
-  // ✅ Now show the screen
-  app.showScreen("screen-random-maths");
-}
-
-
-async function buildRandomMathsQuiz() {
-  appState.quizMode = "random-maths";
-
-  // ✅ Read selected topics
-  const selectedTopics = Array.from(
-    document.querySelectorAll("#random-maths-topics input:checked")
-  ).map(cb => cb.value);
-
-  if (selectedTopics.length === 0) {
-    alert("Select at least one Maths topic");
-    return;
-  }
-
-  // ✅ Number of questions
-  let totalQuestions = parseInt(
-    document.getElementById("random-maths-count").value
-  );
-
-  if (isNaN(totalQuestions) || totalQuestions < 5) {
-    totalQuestions = 20;
-  }
-
-  // ✅ Negative marking toggle
-  const negToggle = document.getElementById("maths-neg-toggle");
-  appState.negativeMarking = negToggle ? negToggle.checked : true;
-
-  // ✅ Show loader
-  app.showLoader("Preparing Random Maths Quiz...");
-
-  const subject = "Mathematics";
-  const years = QUIZ_TREE[subject] || [];
-  let allQuestions = [];
-
-  // ✅ Fetch Maths questions (cached)
-  for (const year of years) {
-    updateLoaderText(`Loading Mathematics ${year}...`);
-
-    const url = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${subject}/${year}.json`;
-
-    try {
-      let topicMap = getCachedGK(subject, year);
-
-      if (!topicMap) {
-        const res = await fetch(url);
-        const json = await res.json();
-        topicMap = json.subtopics || json.topics || json;
-        setCachedGK(subject, year, topicMap);
-      }
-
-      // ✅ Extract only selected topics
-      Object.entries(topicMap).forEach(([topicName, qArr]) => {
-        if (!selectedTopics.includes(topicName)) return;
-
-        qArr.forEach((q) => {
-          allQuestions.push({
-            ...q,
-            _subject: "Mathematics",
-            _topic: topicName,
-          });
-        });
-      });
-    } catch (e) {
-      console.warn(`Failed Mathematics ${year}`, e);
-    }
-  }
-
-  if (allQuestions.length === 0) {
-    app.showError("No questions found for selected Maths topics.");
-    return;
-  }
-
-  // ✅ Shuffle
-  allQuestions.sort(() => Math.random() - 0.5);
-
-  // ✅ Pick balanced random set (reuse your helper)
-  const finalQuestions = pickRandomQuestions(
-    allQuestions,
-    totalQuestions
-  );
-
-  updateLoaderText("Finalizing your Maths quiz...");
-
-  // ✅ Start quiz
-  startQuizEngine(finalQuestions);
-}
-
 
 // --- Loader Helpers ---
 function updateLoaderText(msg) {
@@ -729,8 +392,7 @@ function renderSubtopics(topicList) {
   list.innerHTML = "";
 
   if (topicList.length === 0) {
-    list.innerHTML =
-      "<p>No subtopics found. The file structure might be unrecognized.</p>";
+    list.innerHTML = "<p>No subtopics found. The file structure might be unrecognized.</p>";
     return;
   }
 
@@ -776,14 +438,13 @@ function generateQuizFromSelection() {
 // --- Random GK Helpers ---
 function pickRandomQuestions(allQuestions, limit) {
   const byTopic = {};
-
   allQuestions.forEach((q) => {
-    if (!byTopic[q._topic]) byTopic[q._topic] = [];
-    byTopic[q._topic].push(q);
+    const t = q._topic || "General";
+    if (!byTopic[t]) byTopic[t] = [];
+    byTopic[t].push(q);
   });
 
   const topics = Object.keys(byTopic).sort(() => Math.random() - 0.5);
-
   const result = [];
 
   while (result.length < limit && topics.length) {
@@ -794,7 +455,6 @@ function pickRandomQuestions(allQuestions, limit) {
       }
     }
   }
-
   return result;
 }
 
@@ -803,7 +463,6 @@ function startQuizEngine(questions) {
   appState.questions = questions;
   appState.currentQuestionIndex = 0;
   appState.userAnswers = {};
-
   appState._resultsComputed = false;
 
   app.showScreen("screen-quiz");
@@ -817,9 +476,7 @@ function renderQuestion() {
   const total = appState.questions.length;
   const current = appState.currentQuestionIndex + 1;
   document.getElementById("q-progress").textContent = `${current} / ${total}`;
-  document.getElementById("progress-fill").style.width = `${
-    (current / total) * 100
-  }%`;
+  document.getElementById("progress-fill").style.width = `${(current / total) * 100}%`;
 
   const qText = qData.question || qData.statement || "Question text missing";
   document.getElementById("q-text").innerHTML = `${current}. ${qText}`;
@@ -827,6 +484,7 @@ function renderQuestion() {
   const optionsContainer = document.getElementById("q-options");
   optionsContainer.innerHTML = "";
 
+  // Handle missing options gracefully
   let options = qData.options || qData.choices || [];
   if (!Array.isArray(options) && typeof options === "object") {
     options = Object.values(options);
@@ -835,14 +493,11 @@ function renderQuestion() {
   options.forEach((optText, index) => {
     const label = document.createElement("label");
     label.className = "option-label";
-    const isSelected =
-      appState.userAnswers[appState.currentQuestionIndex] === optText;
+    const isSelected = appState.userAnswers[appState.currentQuestionIndex] === optText;
     if (isSelected) label.classList.add("selected");
 
     label.innerHTML = `
-            <input type="radio" name="q-opt" class="hidden" ${
-              isSelected ? "checked" : ""
-            }>
+            <input type="radio" name="q-opt" class="hidden" ${isSelected ? "checked" : ""}>
             <span>${optText}</span>
         `;
     label.onclick = () => selectOption(optText, index);
@@ -854,14 +509,12 @@ function renderQuestion() {
   const btnSubmit = document.getElementById("btn-submit");
   const btnClear = document.getElementById("btn-clear");
 
-  // Show clear button only if something is selected
   if (appState.userAnswers[appState.currentQuestionIndex] != null) {
     btnClear.classList.remove("hidden");
   } else {
     btnClear.classList.add("hidden");
   }
 
-  // Clear logic
   btnClear.onclick = () => {
     delete appState.userAnswers[appState.currentQuestionIndex];
     renderQuestion();
@@ -900,8 +553,6 @@ function renderQuestion() {
   if (window.MathJax) {
     MathJax.typesetPromise();
   }
-
-  // Save on every question render so reload can restore mid-quiz
   saveAppState();
 }
 
@@ -920,7 +571,6 @@ function calculateResults() {
   const reviewList = document.getElementById("review-list");
   reviewList.innerHTML = "";
 
-  // Topic-wise stats object
   const topicStats = {};
 
   appState.questions.forEach((q, index) => {
@@ -942,8 +592,7 @@ function calculateResults() {
     const t = topicStats[topic];
     t.total += 1;
 
-    const isUnattempted =
-      userAns == null || userAns === "" || userAns === undefined;
+    const isUnattempted = userAns == null || userAns === "" || userAns === undefined;
     const isCorrect = !isUnattempted && userAns === correctAns;
 
     if (isUnattempted) {
@@ -955,7 +604,6 @@ function calculateResults() {
     } else {
       wrongCount++;
       t.wrong++;
-
       if (appState.negativeMarking) {
         score -= 0.33;
       }
@@ -963,6 +611,9 @@ function calculateResults() {
 
     const reviewItem = document.createElement("div");
     reviewItem.className = `review-item ${isCorrect ? "correct" : "wrong"}`;
+    
+    // Safety check for options existing to determine "Wrong" vs "Unattempted" visually if desired
+    // But basic display logic:
     reviewItem.innerHTML = `
             <p><strong>Q${index + 1}:</strong> ${q.question || q.statement}</p>
             <div class="ans-row">
@@ -988,17 +639,11 @@ function calculateResults() {
   Object.keys(topicStats).forEach((topic) => {
     const t = topicStats[topic];
     t.accuracy = t.total > 0 ? Math.round((t.correct / t.total) * 100) : 0;
-
-    if (t.accuracy >= 80) {
-      t.level = "Strong";
-    } else if (t.accuracy >= 50) {
-      t.level = "Needs Practice";
-    } else {
-      t.level = "Weak";
-    }
+    if (t.accuracy >= 80) t.level = "Strong";
+    else if (t.accuracy >= 50) t.level = "Needs Practice";
+    else t.level = "Weak";
   });
 
-  // ✅ FORMAT FINAL SCORE (ADD HERE)
   score = Math.max(0, score);
   score = score.toFixed(2);
 
@@ -1007,20 +652,17 @@ function calculateResults() {
   document.getElementById("stat-wrong").textContent = wrongCount;
 
   renderTopicStats(topicStats);
-
   app.showScreen("screen-result");
 
   if (window.MathJax) {
     MathJax.typesetPromise([document.getElementById("review-list")]);
   }
-
   saveAppState();
 }
 
 function renderTopicStats(topicStats) {
   const container = document.getElementById("topic-stats");
   if (!container) return;
-
   container.innerHTML = "";
 
   const topics = Object.keys(topicStats);
@@ -1030,9 +672,7 @@ function renderTopicStats(topicStats) {
   }
 
   topics.forEach((topic) => {
-    const { total, correct, wrong, unattempted, accuracy, level } =
-      topicStats[topic];
-
+    const { total, correct, wrong, unattempted, accuracy, level } = topicStats[topic];
     let levelClass = "";
     if (level === "Strong") levelClass = "text-green";
     if (level === "Weak") levelClass = "text-red";
@@ -1058,7 +698,6 @@ function renderTopicStats(topicStats) {
                 <div style="font-size:0.8rem; color:var(--text-muted);">${level}</div>
             </div>
         `;
-
     container.appendChild(row);
   });
 }
@@ -1077,7 +716,7 @@ function getCachedGK(subject, year) {
 
   try {
     const parsed = JSON.parse(raw);
-    GK_CACHE[memKey] = parsed; // hydrate memory
+    GK_CACHE[memKey] = parsed;
     return parsed;
   } catch {
     return null;
@@ -1087,26 +726,24 @@ function getCachedGK(subject, year) {
 function setCachedGK(subject, year, data) {
   const memKey = `${subject}-${year}`;
   const localKey = getCacheKey(subject, year);
-
   GK_CACHE[memKey] = data;
   try {
     localStorage.setItem(localKey, JSON.stringify(data));
   } catch {
-    // storage full → silently ignore
+    // storage full
   }
 }
 
-//  ---Random GK quiz helper---
+// Updated Subject List based on your files
 const GK_SUBJECTS = [
-  "history",
-  "polity",
-  "geography",
-  "economics",
-  "science",
-  "computer_science",
+  "Biology",
+  "Chemistry",
+  "Economy",
+  "General_Knowledge",
+  "Geography",
+  "History",
+  "Physics"
 ];
-
-const MATHS_SUBJECT = "Mathematics";
 
 // --- Theme Management ---
 function initTheme() {
@@ -1114,9 +751,7 @@ function initTheme() {
   if (!toggle) return;
 
   const savedTheme = localStorage.getItem("theme");
-  const systemPrefersDark = window.matchMedia(
-    "(prefers-color-scheme: dark)"
-  ).matches;
+  const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
   if (savedTheme === "dark" || (!savedTheme && systemPrefersDark)) {
     document.body.setAttribute("data-theme", "dark");
@@ -1143,11 +778,10 @@ function initTheme() {
     }
   };
 }
+
 // --- Router / reload handling ---
 function restoreOrBoot() {
   const saved = loadSavedAppState();
-
-  // Always build subjects, it's the root
   loadSubjects();
 
   if (!saved) {
@@ -1155,7 +789,6 @@ function restoreOrBoot() {
     return;
   }
 
-  // Restore state object
   appState.subject = saved.subject || null;
   appState.year = saved.year || null;
   appState.subtopics = saved.subtopics || [];
@@ -1165,21 +798,11 @@ function restoreOrBoot() {
   appState.topicMap = saved.topicMap || null;
   appState.currentScreen = saved.currentScreen || "screen-subjects";
 
-  // **ROBUST RESTORE LOGIC**
-
-  // 1. If we have a subject saved, re-run selectSubject logic to populate Years Grid
-  //    (This ensures the "Back" button works if we are deep in the app)
   if (appState.subject) {
-    // We do this manually to avoid triggering the 'showScreen' inside selectSubject
-    // which might conflict with where we actually want to go.
-    // Re-setting the header:
-    const title = appState.subject
-      .split("_")
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(" ");
+    const title = appState.subject.replace(/_/g, " ");
     document.getElementById("selected-subject-title").textContent = title;
-
-    // Re-populating the grid:
+    
+    // Restore grid for back button functionality
     const years = QUIZ_TREE[appState.subject] || [];
     const grid = document.getElementById("year-grid");
     grid.innerHTML = "";
@@ -1192,7 +815,6 @@ function restoreOrBoot() {
     });
   }
 
-  // 2. Decide which screen to actually show
   const screen = appState.currentScreen;
 
   if (screen === "screen-years") {
@@ -1203,7 +825,6 @@ function restoreOrBoot() {
       renderSubtopics(subtopics);
       app.showScreen("screen-subtopics", { skipHistory: true });
     } else {
-      // Fallback if data missing
       app.showScreen("screen-subjects", { skipHistory: true });
     }
   } else if (screen === "screen-random-config") {
@@ -1211,7 +832,6 @@ function restoreOrBoot() {
     app.showScreen("screen-random-config", { skipHistory: true });
   } else if (screen === "screen-quiz") {
     if (appState.questions && appState.questions.length > 0) {
-      // Determine if we also need to populate subtopics (for back button)
       if (appState.topicMap) {
         renderSubtopics(Object.keys(appState.topicMap));
       }
@@ -1224,7 +844,7 @@ function restoreOrBoot() {
     if (appState._resultsComputed) {
       app.showScreen("screen-result", { skipHistory: true });
     } else if (appState.questions && appState.questions.length > 0) {
-      calculateResults(); // first time only
+      calculateResults(); 
     } else {
       app.showScreen("screen-subjects", { skipHistory: true });
     }
@@ -1236,49 +856,24 @@ function restoreOrBoot() {
 function initRandomGK() {
   const btn = document.getElementById("start-random");
   if (!btn) return;
-
   btn.onclick = buildRandomGKQuiz;
 }
 
 function initRandomQuizButton() {
   const btn = document.getElementById("random-quiz-btn");
   if (!btn) return;
-
   btn.onclick = () => {
     app.showScreen("screen-random-config");
     loadRandomGKSubjects();
   };
 }
 
-function initRandomMathsButton() {
-  const btn = document.getElementById("random-maths-btn");
-  if (!btn) return;
-
-  btn.onclick = () => {
-    loadRandomMathsTopics();
-  };
-}
-
-function initRandomMathsStart() {
-  const btn = document.getElementById("start-random-maths");
-  if (!btn) return;
-
-  btn.onclick = () => {
-    console.log("✅ Start Random Maths clicked");
-    buildRandomMathsQuiz();
-  };
-}
-
-
-
 function initRouter() {
   window.addEventListener("popstate", (event) => {
     const state = event.state;
     if (state && state.screenId) {
       const screenId = state.screenId;
-      app.showScreen(screenId, {
-        skipHistory: true,
-      });
+      app.showScreen(screenId, { skipHistory: true });
 
       if (screenId === "screen-quiz") {
         renderQuestion();
@@ -1286,18 +881,14 @@ function initRouter() {
         calculateResults();
       }
     } else {
-      app.showScreen("screen-subjects", {
-        skipHistory: true,
-      });
+      app.showScreen("screen-subjects", { skipHistory: true });
     }
   });
 }
+
 // --- INITIALIZATION ---
 initTheme();
 restoreOrBoot();
 initRouter();
 initRandomGK();
 initRandomQuizButton();
-initRandomMathsButton();
-initRandomMathsStart();
-
