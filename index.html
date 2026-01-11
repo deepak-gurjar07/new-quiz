@@ -112,11 +112,7 @@
           <div id="random-quiz-btn" class="card-btn random-card">
             🎯 Take Random GK Quiz
           </div>
-
-          <div id="random-maths-btn" class="card-btn random-card maths-card">
-            📐 Random Maths Quiz
           </div>
-        </div>
       </div>
 
       <div id="screen-random-config" class="screen hidden">
@@ -127,7 +123,6 @@
           <p>Select subjects, topics, and number of questions</p>
         </div>
 
-        <!-- Subjects -->
         <div class="config-card">
           <h3>Select Subjects</h3>
           <div class="checkbox-list" id="random-subjects"></div>
@@ -154,42 +149,6 @@
 
           <button class="btn btn-primary btn-large" id="start-random">
             Start Random Quiz
-          </button>
-        </div>
-      </div>
-
-      <div id="screen-random-maths" class="screen hidden">
-        <button class="btn-back" onclick="app.goBack()">← Back</button>
-
-        <div class="header-section">
-          <h1>Random Maths Quiz</h1>
-          <p>Mixed practice from all Maths topics</p>
-        </div>
-
-        <div class="config-card">
-          <h3>Select Topics</h3>
-          <div class="checkbox-list" id="random-maths-topics"></div>
-
-          <!-- reuse number input -->
-          <div class="number-input">
-            <label>Number of Questions</label>
-            <input
-              type="number"
-              id="random-maths-count"
-              value="20"
-              min="5"
-              step="5"
-            />
-          </div>
-
-          <!-- reuse negative marking -->
-          <label class="checkbox-item" style="margin-top: 1rem">
-            <input type="checkbox" id="maths-neg-toggle" checked />
-            <span>Apply negative marking (−0.33)</span>
-          </label>
-
-          <button class="btn btn-primary btn-large" id="start-random-maths">
-            Start Random Maths Quiz
           </button>
         </div>
       </div>
