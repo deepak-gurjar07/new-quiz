@@ -1,7 +1,7 @@
 /**
  * CDS PYQ Quiz Platform
  * Customized for cds-pyq-json data structure
- * Fixed: Explanations now showing in results
+ * Fixed: Explanations are now Forced to show with a distinct background
  */
 
 (function () {
@@ -11,7 +11,7 @@
     const BRANCH = "main";
 
     const GK_CACHE = {};
-    const CACHE_PREFIX = "cds-gk-cache-v2";
+    const CACHE_PREFIX = "cds-gk-cache-v3"; // Bumped cache version
 
     const GK_SUBJECTS = [
       "Biology",
@@ -73,7 +73,8 @@
       negativeMarking: true,
     };
 
-    const APP_STATE_STORAGE_KEY = "cdsQuizStateV4";
+    // Bumped version to force clear old state that might lack explanations
+    const APP_STATE_STORAGE_KEY = "cdsQuizStateV5";
 
     const screens = {
       subjects: document.getElementById("screen-subjects"),
@@ -485,7 +486,7 @@
       saveAppState();
     }
 
-    // --- FIX IS IN THIS FUNCTION ---
+    // --- RESULT CALCULATION (Explicit Explanation Logic) ---
     function calculateResults() {
       let score = 0,
         correct = 0,
@@ -521,7 +522,13 @@
         const div = document.createElement("div");
         div.className = `review-item ${isCorrect ? "correct" : "wrong"}`;
         
-        // --- ADDED EXPLANATION LOGIC BELOW ---
+        // --- EXPLANATION HTML BLOCK ---
+        const explanationHTML = q.explanation 
+            ? `<div style="margin-top: 10px; padding: 10px; background: rgba(255, 243, 205, 0.5); border-left: 3px solid #ffc107; border-radius: 4px; font-size: 0.95rem; color: #333;">
+                 <strong>💡 Explanation:</strong> ${q.explanation}
+               </div>`
+            : "";
+
         div.innerHTML = `
           <p><strong>Q${idx + 1}:</strong> ${q.question || q.statement}</p>
           <div class="ans-row">
@@ -534,12 +541,8 @@
               ? `<div class="ans-row"><span class="text-green">Correct: ${cAns}</span></div>`
               : ""
           }
-          <div class="ans-row"><small>${topic}</small></div>
-          ${
-            q.explanation 
-              ? `<div class="ans-row" style="margin-top:0.5rem; font-style:italic; font-size:0.9rem; color:var(--text-muted);">💡 Explanation: ${q.explanation}</div>` 
-              : ""
-          }
+          <div class="ans-row"><small style="color: #666;">Topic: ${topic}</small></div>
+          ${explanationHTML}
         `;
         reviewDiv.appendChild(div);
       });
