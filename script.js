@@ -1,894 +1,672 @@
 /**
  * CDS PYQ Quiz Platform
+ * Customized for cds-pyq-json data structure
+ * Fixed: Variable hoisting, Error Handling, and Robust Initialization
  */
 
-const REPO_OWNER = "deepak-gurjar07";
-const REPO_NAME = "cds-pyq-json"; 
-const BRANCH = "main";
-
-// --- Random GK Cache ---
-const GK_CACHE = {}; // in-memory cache
-const CACHE_PREFIX = "cds-gk-cache-v1"; 
-
-// --- CONFIGURATION: DYNAMIC DATA MAP BASED ON UPLOADED FILES ---
-const QUIZ_TREE = {
-  Biology: [
-    "2007-I", "2007-II", "2008-I", "2008-II", "2009-I", "2009-II", "2010-I", "2010-II",
-    "2011-I", "2011-II", "2013-II", "2014-I", "2014-II", "2015-I", "2015-II",
-    "2016-I", "2016-II", "2017-I", "2017-II", "2018-I", "2018-II", "2019-I", "2019-II",
-    "2020-I", "Unknown-I"
-  ],
-  Chemistry: [
-    "2007-II", "2008-I", "2008-II", "2009-I", "2009-II", "2010-I", "2010-II",
-    "2011-I", "2011-II", "2012-I", "2012-II", "2013-I", "2013-II", "2014-II",
-    "2015-I", "2015-II", "2016-I", "2016-II", "2017-I", "2017-II", "2018-I", "2018-II",
-    "2019-I", "2019-II", "2020-I", "Unknown-I"
-  ],
-  Economy: [
-    "2016-II", "Unknown-I"
-  ],
-  General_Knowledge: [
-    "2007-II", "2008-I", "2008-II", "2011-II", "2012-I", "2012-II", "2013-I", "2013-II",
-    "2014-I", "2014-II", "2015-I", "2015-II", "2016-I", "2016-II", "2017-I",
-    "2018-I", "2018-II", "2019-I", "2019-II", "2020-I", "Unknown-I"
-  ],
-  Geography: [
-    "2007-I", "2007-II", "2008-I", "2008-II", "2009-I", "2009-II", "2010-I", "2010-II",
-    "2011-I", "2011-II", "2012-I", "2012-II", "2013-I", "2013-II", "2014-I", "2014-II",
-    "2015-I", "2015-II", "2016-I", "2016-II", "2017-I", "Unknown-I", "unknown-II"
-  ],
-  History: [
-    "2007-II", "2008-I", "2008-II", "2009-I", "2009-II", "2010-I", "2010-II",
-    "2011-I", "2011-II", "2012-I", "2012-II", "2013-I", "2013-II", "2014-I", "2014-II",
-    "2015-I", "2015-II", "2016-I", "2016-II", "2017-I", "Unknown-I"
-  ],
-  Miscellaneous: [
-    "Unknown-I"
-  ],
-  Physics: [
-    "2007-II", "2008-II", "2009-I", "2009-II", "2010-I", "2010-II", "2011-I", "2011-II",
-    "2013-II", "2014-I", "2014-II", "2015-I", "2015-II", "2016-I", "2016-II",
-    "2017-I", "2017-II", "Unknown-I"
-  ]
-};
-
-// --- App State ---
-const appState = {
-  currentScreen: "screen-subjects",
-  subject: null,
-  year: null,
-  subtopics: [],
-  questions: [],
-  currentQuestionIndex: 0,
-  userAnswers: {},
-  topicMap: null,
-  _resultsComputed: false,
-  negativeMarking: true,
-};
-
-const APP_STATE_STORAGE_KEY = "cdsQuizStateV2"; // Bumped version
-
-// --- DOM Elements ---
-const screens = {
-  subjects: document.getElementById("screen-subjects"),
-  random: document.getElementById("screen-random-config"),
-  // randomMaths: document.getElementById("screen-random-maths"), // Removed
-  years: document.getElementById("screen-years"),
-  subtopics: document.getElementById("screen-subtopics"),
-  quiz: document.getElementById("screen-quiz"),
-  result: document.getElementById("screen-result"),
-  loader: document.getElementById("loader"),
-  error: document.getElementById("error-screen"),
-};
-
-// --- Helpers for saving/restoring app state ---
-function saveAppState() {
+(function () {
+  // Wrap in IIFE to avoid global scope pollution
   try {
-    const toSave = {
-      currentScreen: appState.currentScreen,
-      subject: appState.subject,
-      year: appState.year,
-      subtopics: appState.subtopics,
-      questions: appState.questions,
-      currentQuestionIndex: appState.currentQuestionIndex,
-      userAnswers: appState.userAnswers,
-      topicMap: appState.topicMap,
+    const REPO_OWNER = "deepak-gurjar07";
+    const REPO_NAME = "cds-pyq-json";
+    const BRANCH = "main";
+
+    // --- Random GK Cache ---
+    const GK_CACHE = {};
+    const CACHE_PREFIX = "cds-gk-cache-v2";
+
+    // --- CONFIGURATION: SUBJECTS FOR RANDOM QUIZ (Moved to top) ---
+    const GK_SUBJECTS = [
+      "Biology",
+      "Chemistry",
+      "Economy",
+      "General_Knowledge",
+      "Geography",
+      "History",
+      "Physics",
+    ];
+
+    // --- CONFIGURATION: FILE MAPPING ---
+    const QUIZ_TREE = {
+      Biology: [
+        "2007-I", "2007-II", "2008-I", "2008-II", "2009-I", "2009-II", "2010-I", "2010-II",
+        "2011-I", "2011-II", "2013-II", "2014-I", "2014-II", "2015-I", "2015-II",
+        "2016-I", "2016-II", "2017-I", "2017-II", "2018-I", "2018-II", "2019-I", "2019-II",
+        "2020-I", "Unknown-I"
+      ],
+      Chemistry: [
+        "2007-II", "2008-I", "2008-II", "2009-I", "2009-II", "2010-I", "2010-II",
+        "2011-I", "2011-II", "2012-I", "2012-II", "2013-I", "2013-II", "2014-II",
+        "2015-I", "2015-II", "2016-I", "2016-II", "2017-I", "2017-II", "2018-I", "2018-II",
+        "2019-I", "2019-II", "2020-I", "Unknown-I"
+      ],
+      Economy: ["2016-II", "Unknown-I"],
+      General_Knowledge: [
+        "2007-II", "2008-I", "2008-II", "2011-II", "2012-I", "2012-II", "2013-I", "2013-II",
+        "2014-I", "2014-II", "2015-I", "2015-II", "2016-I", "2016-II", "2017-I",
+        "2018-I", "2018-II", "2019-I", "2019-II", "2020-I", "Unknown-I"
+      ],
+      Geography: [
+        "2007-I", "2007-II", "2008-I", "2008-II", "2009-I", "2009-II", "2010-I", "2010-II",
+        "2011-I", "2011-II", "2012-I", "2012-II", "2013-I", "2013-II", "2014-I", "2014-II",
+        "2015-I", "2015-II", "2016-I", "2016-II", "2017-I", "Unknown-I", "unknown-II"
+      ],
+      History: [
+        "2007-II", "2008-I", "2008-II", "2009-I", "2009-II", "2010-I", "2010-II",
+        "2011-I", "2011-II", "2012-I", "2012-II", "2013-I", "2013-II", "2014-I", "2014-II",
+        "2015-I", "2015-II", "2016-I", "2016-II", "2017-I", "Unknown-I"
+      ],
+      Miscellaneous: ["Unknown-I"],
+      Physics: [
+        "2007-II", "2008-II", "2009-I", "2009-II", "2010-I", "2010-II", "2011-I", "2011-II",
+        "2013-II", "2014-I", "2014-II", "2015-I", "2015-II", "2016-I", "2016-II",
+        "2017-I", "2017-II", "Unknown-I"
+      ]
     };
-    localStorage.setItem(APP_STATE_STORAGE_KEY, JSON.stringify(toSave));
-  } catch (err) {
-    console.warn("Failed to save app state", err);
-  }
-}
 
-function loadSavedAppState() {
-  try {
-    const raw = localStorage.getItem(APP_STATE_STORAGE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch (err) {
-    console.warn("Failed to parse saved app state", err);
-    return null;
-  }
-}
+    // --- App State ---
+    const appState = {
+      currentScreen: "screen-subjects",
+      subject: null,
+      year: null,
+      subtopics: [],
+      questions: [],
+      currentQuestionIndex: 0,
+      userAnswers: {},
+      topicMap: null,
+      _resultsComputed: false,
+      negativeMarking: true,
+    };
 
-function clearSavedAppState() {
-  try {
-    localStorage.removeItem(APP_STATE_STORAGE_KEY);
-  } catch (err) {
-    console.warn("Failed to clear saved app state", err);
-  }
-}
+    const APP_STATE_STORAGE_KEY = "cdsQuizStateV3"; // Force fresh state
 
-// --- Navigation Logic ---
-const app = {
-  showScreen: (screenId, options = {}) => {
-    Object.values(screens).forEach((s) => {
-        if(s) s.classList.remove("active", "hidden");
-    });
-    Object.values(screens).forEach((s) => {
-      if (s && s.id !== screenId) s.classList.add("hidden");
-    });
+    // --- DOM Elements ---
+    const screens = {
+      subjects: document.getElementById("screen-subjects"),
+      random: document.getElementById("screen-random-config"),
+      years: document.getElementById("screen-years"),
+      subtopics: document.getElementById("screen-subtopics"),
+      quiz: document.getElementById("screen-quiz"),
+      result: document.getElementById("screen-result"),
+      loader: document.getElementById("loader"),
+      error: document.getElementById("error-screen"),
+    };
 
-    const el = document.getElementById(screenId);
-    if (!el) return;
-
-    el.classList.add("active");
-    appState.currentScreen = screenId;
-
-    // History integration
-    if (!options.skipHistory) {
+    // --- Helpers ---
+    function saveAppState() {
       try {
-        history.pushState({ screenId }, "", "#" + screenId);
-      } catch (_) {}
+        const toSave = {
+          currentScreen: appState.currentScreen,
+          subject: appState.subject,
+          year: appState.year,
+          subtopics: appState.subtopics,
+          questions: appState.questions,
+          currentQuestionIndex: appState.currentQuestionIndex,
+          userAnswers: appState.userAnswers,
+          topicMap: appState.topicMap,
+        };
+        localStorage.setItem(APP_STATE_STORAGE_KEY, JSON.stringify(toSave));
+      } catch (err) {
+        console.warn("Failed to save state", err);
+      }
     }
-    appState._resultsComputed = true;
-    saveAppState();
-  },
 
-  showLoader: (msg = "Loading...") => {
-    document.getElementById("loader-text").textContent = msg;
-
-    Object.values(screens).forEach((s) => {
-        if(s) s.classList.remove("active", "hidden");
-    });
-    Object.values(screens).forEach((s) => {
-        if(s) s.classList.add("hidden")
-    });
-
-    screens.loader.classList.remove("hidden");
-    screens.loader.classList.add("active");
-  },
-
-  showError: (msg) => {
-    document.getElementById("error-message").textContent = msg;
-    Object.values(screens).forEach((s) => {
-        if(s) s.classList.add("hidden")
-    });
-    screens.error.classList.remove("hidden");
-    screens.error.classList.add("active");
-  },
-
-  goBack: () => {
-    if (appState.currentScreen === "screen-years") {
-      app.showScreen("screen-subjects");
-    } else if (appState.currentScreen === "screen-subtopics") {
-      app.showScreen("screen-years");
-    } else if (appState.currentScreen === "screen-quiz") {
-      app.showScreen("screen-subtopics");
-    } else if (appState.currentScreen === "screen-result") {
-      app.showScreen("screen-subjects");
-    } else if (appState.currentScreen === "screen-random-config") {
-      app.showScreen("screen-subjects");
+    function loadSavedAppState() {
+      try {
+        const raw = localStorage.getItem(APP_STATE_STORAGE_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch {
+        return null;
+      }
     }
-  },
 
-  goHome: () => {
-    if (confirm("Return to Home? Any current progress will be lost.")) {
-      clearSavedAppState();
-      app.showScreen("screen-subjects");
+    function clearSavedAppState() {
+      try {
+        localStorage.removeItem(APP_STATE_STORAGE_KEY);
+      } catch {}
     }
-  },
 
-  quitQuiz: () => {
-    if (confirm("Are you sure you want to quit the quiz? Your progress will be lost.")) {
-      app.showScreen("screen-subtopics");
-    }
-  },
-};
+    // --- Navigation ---
+    const app = {
+      showScreen: (screenId, options = {}) => {
+        // 1. Hide all first
+        Object.values(screens).forEach((s) => {
+          if (s) {
+            s.classList.remove("active");
+            s.classList.add("hidden");
+          }
+        });
 
-// --- 1. Load Subjects ---
-function loadSubjects() {
-  console.log("Loading Subjects...");
-  const grid = document.getElementById("subject-grid");
-  grid.innerHTML = "";
-
-  const subjects = Object.keys(QUIZ_TREE);
-
-  subjects.forEach((subName) => {
-    // Replace underscores with spaces for display
-    const displayName = subName.replace(/_/g, " ");
-
-    const btn = document.createElement("div");
-    btn.className = "card-btn";
-    btn.textContent = displayName;
-    btn.onclick = () => selectSubject(subName);
-    grid.appendChild(btn);
-  });
-  
-  // Note: Random Quiz buttons are in HTML
-}
-
-// --- 2. Load Years ---
-function selectSubject(subjectName) {
-  appState.subject = subjectName;
-  const title = subjectName.replace(/_/g, " ");
-  document.getElementById("selected-subject-title").textContent = title;
-
-  const years = QUIZ_TREE[subjectName] || [];
-  const grid = document.getElementById("year-grid");
-  grid.innerHTML = "";
-
-  if (years.length === 0) {
-    grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No papers added for this subject yet.</p>';
-  } else {
-    years.forEach((year) => {
-      const btn = document.createElement("div");
-      btn.className = "card-btn";
-      btn.textContent = year;
-      // Ensure we append .json here
-      btn.onclick = () => selectYear(subjectName, `${year}.json`);
-      grid.appendChild(btn);
-    });
-  }
-
-  app.showScreen("screen-years");
-}
-
-// --- 3. Fetch Full JSON & Extract Subtopics ---
-async function selectYear(subject, filename) {
-  // Construct URL for the new repo structure
-  const rawUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${subject}/${filename}`;
-  appState.year = filename.replace(".json", "");
-
-  app.showLoader("Parsing Questions...");
-
-  try {
-    const res = await fetch(rawUrl);
-    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-    const json = await res.json();
-
-    // SMART PARSER LOGIC
-    let finalMap = {};
-
-    if (json.subtopics) {
-      finalMap = json.subtopics;
-    } else if (json.topics) {
-      finalMap = json.topics;
-    } else {
-      // Handle the format {"Biology 2019-I": [...]}
-      const keys = Object.keys(json);
-      keys.forEach((key) => {
-        if (Array.isArray(json[key])) {
-          finalMap[key] = json[key];
+        // 2. Show target
+        const el = document.getElementById(screenId);
+        if (el) {
+          el.classList.remove("hidden");
+          el.classList.add("active");
+        } else {
+          console.error(`Screen ID not found: ${screenId}`);
+          return;
         }
+
+        appState.currentScreen = screenId;
+
+        if (!options.skipHistory) {
+          try {
+            history.pushState({ screenId }, "", "#" + screenId);
+          } catch (_) {}
+        }
+        appState._resultsComputed = true;
+        saveAppState();
+      },
+
+      showLoader: (msg = "Loading...") => {
+        const txt = document.getElementById("loader-text");
+        if (txt) txt.textContent = msg;
+
+        Object.values(screens).forEach((s) => {
+          if (s) {
+            s.classList.remove("active");
+            s.classList.add("hidden");
+          }
+        });
+
+        if (screens.loader) {
+          screens.loader.classList.remove("hidden");
+          screens.loader.classList.add("active");
+        }
+      },
+
+      showError: (msg) => {
+        const txt = document.getElementById("error-message");
+        if (txt) txt.textContent = msg;
+
+        Object.values(screens).forEach((s) => {
+          if (s) s.classList.add("hidden");
+        });
+
+        if (screens.error) {
+          screens.error.classList.remove("hidden");
+          screens.error.classList.add("active");
+        }
+      },
+
+      goBack: () => {
+        const s = appState.currentScreen;
+        if (s === "screen-years") app.showScreen("screen-subjects");
+        else if (s === "screen-subtopics") app.showScreen("screen-years");
+        else if (s === "screen-quiz") app.showScreen("screen-subtopics");
+        else if (s === "screen-result") app.showScreen("screen-subjects");
+        else if (s === "screen-random-config") app.showScreen("screen-subjects");
+        else app.showScreen("screen-subjects");
+      },
+
+      goHome: () => {
+        if (confirm("Return to Home? Progress will be lost.")) {
+          clearSavedAppState();
+          app.showScreen("screen-subjects");
+        }
+      },
+
+      quitQuiz: () => {
+        if (confirm("Quit quiz? Progress will be lost.")) {
+          app.showScreen("screen-subtopics");
+        }
+      },
+    };
+
+    // --- Logic: Load Subjects ---
+    function loadSubjects() {
+      const grid = document.getElementById("subject-grid");
+      if (!grid) return;
+      grid.innerHTML = "";
+
+      const subjects = Object.keys(QUIZ_TREE);
+
+      subjects.forEach((subName) => {
+        const displayName = subName.replace(/_/g, " ");
+        const btn = document.createElement("div");
+        btn.className = "card-btn";
+        btn.textContent = displayName;
+        btn.onclick = () => selectSubject(subName);
+        grid.appendChild(btn);
       });
     }
 
-    appState.topicMap = finalMap;
-    const subtopics = Object.keys(finalMap);
+    // --- Logic: Load Years ---
+    function selectSubject(subjectName) {
+      appState.subject = subjectName;
+      const titleEl = document.getElementById("selected-subject-title");
+      if (titleEl) titleEl.textContent = subjectName.replace(/_/g, " ");
 
-    renderSubtopics(subtopics);
-    app.showScreen("screen-subtopics");
-  } catch (err) {
-    console.error(err);
-    app.showError("Error parsing the question file. Check console for details.");
-  }
-}
+      const years = QUIZ_TREE[subjectName] || [];
+      const grid = document.getElementById("year-grid");
+      if (grid) {
+        grid.innerHTML = "";
+        if (years.length === 0) {
+          grid.innerHTML = "<p>No papers found.</p>";
+        } else {
+          years.forEach((year) => {
+            const btn = document.createElement("div");
+            btn.className = "card-btn";
+            btn.textContent = year;
+            btn.onclick = () => selectYear(subjectName, `${year}.json`);
+            grid.appendChild(btn);
+          });
+        }
+      }
+      app.showScreen("screen-years");
+    }
 
-// Load Subjects for Random Mode
-function loadRandomGKSubjects() {
-  const container = document.getElementById("random-subjects");
-  if (!container || container.children.length > 0) return;
-  container.innerHTML = "";
-
-  GK_SUBJECTS.forEach((subject) => {
-    const label = document.createElement("label");
-    label.className = "checkbox-item";
-    label.innerHTML = `
-      <input type="checkbox" value="${subject}" checked>
-      <span>${subject.replace(/_/g, " ")}</span>
-    `;
-    container.appendChild(label);
-  });
-}
-
-async function buildRandomGKQuiz() {
-  const selectedSubjects = Array.from(
-    document.querySelectorAll("#random-subjects input:checked")
-  ).map((cb) => cb.value);
-
-  let totalQuestions = parseInt(document.getElementById("random-q-count").value);
-  if (isNaN(totalQuestions) || totalQuestions < 5) totalQuestions = 20;
-  if (totalQuestions > 200) totalQuestions = 200;
-
-  if (selectedSubjects.length === 0) {
-    alert("Select at least one subject");
-    return;
-  }
-
-  const negToggle = document.getElementById("neg-marking-toggle");
-  appState.negativeMarking = negToggle ? negToggle.checked : true;
-
-  app.showLoader("Building Random GK Quiz...");
-
-  let allQuestions = [];
-  let loadedCount = 0;
-
-  for (const subject of selectedSubjects) {
-    updateLoaderText(`Loading ${subject.replace(/_/g, " ")} questions...`);
-    const years = QUIZ_TREE[subject] || [];
-
-    for (const year of years) {
-      // Append .json as stored keys don't have it
-      const url = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${subject}/${year}.json`;
+    // --- Logic: Fetch & Parse ---
+    async function selectYear(subject, filename) {
+      const rawUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${subject}/${filename}`;
+      appState.year = filename.replace(".json", "");
+      app.showLoader("Fetching Questions...");
 
       try {
-        let topicMap = getCachedGK(subject, year);
+        const res = await fetch(rawUrl);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
 
-        if (!topicMap) {
-          updateLoaderText(`Fetching ${subject.replace(/_/g, " ")} ${year}...`);
-          const res = await fetch(url);
-          const json = await res.json();
-          topicMap = json.subtopics || json.topics || json;
-          
-          // Handle root array wrap if necessary (for {"Subj 2019": []} format)
-          const keys = Object.keys(topicMap);
-           // If the JSON is directly just { "Key": [] }
-           // The cached data should be that map.
-          setCachedGK(subject, year, topicMap);
-        } else {
-          updateLoaderText(`Using cached ${subject.replace(/_/g, " ")} ${year}`);
+        let finalMap = {};
+        if (json.subtopics) finalMap = json.subtopics;
+        else if (json.topics) finalMap = json.topics;
+        else {
+          Object.keys(json).forEach((key) => {
+            if (Array.isArray(json[key])) finalMap[key] = json[key];
+          });
         }
 
-        Object.entries(topicMap).forEach(([topicName, qArr]) => {
-          if(Array.isArray(qArr)) {
-             qArr.forEach((q) => {
-              allQuestions.push({
-                ...q,
-                _subject: subject,
-                _topic: topicName,
-              });
-              loadedCount++;
-            }); 
+        appState.topicMap = finalMap;
+        renderSubtopics(Object.keys(finalMap));
+        app.showScreen("screen-subtopics");
+      } catch (err) {
+        console.error(err);
+        app.showError("Failed to load questions. Check internet or file URL.");
+      }
+    }
+
+    // --- Logic: Random Quiz ---
+    function loadRandomGKSubjects() {
+      const container = document.getElementById("random-subjects");
+      if (!container || container.children.length > 0) return;
+      container.innerHTML = "";
+
+      GK_SUBJECTS.forEach((subject) => {
+        const label = document.createElement("label");
+        label.className = "checkbox-item";
+        label.innerHTML = `
+          <input type="checkbox" value="${subject}" checked>
+          <span>${subject.replace(/_/g, " ")}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    async function buildRandomGKQuiz() {
+      const checkedBoxes = document.querySelectorAll(
+        "#random-subjects input:checked"
+      );
+      const selectedSubjects = Array.from(checkedBoxes).map((cb) => cb.value);
+
+      if (selectedSubjects.length === 0) {
+        alert("Select at least one subject.");
+        return;
+      }
+
+      let count = parseInt(document.getElementById("random-q-count").value);
+      if (!count || count < 5) count = 20;
+
+      const negToggle = document.getElementById("neg-marking-toggle");
+      appState.negativeMarking = negToggle ? negToggle.checked : true;
+
+      app.showLoader("Building Random Quiz...");
+
+      let allQuestions = [];
+
+      for (const subject of selectedSubjects) {
+        updateLoaderText(`Loading ${subject}...`);
+        const years = QUIZ_TREE[subject] || [];
+
+        for (const year of years) {
+          try {
+            let map = getCachedGK(subject, year);
+            if (!map) {
+              const url = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${subject}/${year}.json`;
+              const res = await fetch(url);
+              const json = await res.json();
+              map = json.subtopics || json.topics || json;
+              setCachedGK(subject, year, map);
+            }
+
+            Object.entries(map).forEach(([topic, qArr]) => {
+              if (Array.isArray(qArr)) {
+                qArr.forEach((q) => {
+                  allQuestions.push({ ...q, _subject: subject, _topic: topic });
+                });
+              }
+            });
+          } catch (e) {
+            console.warn(`Skip ${subject} ${year}`);
           }
-        });
-      } catch (e) {
-        console.warn(`Failed ${subject} ${year}`, e);
+        }
       }
-    }
-  }
 
-  updateLoaderText("Finalizing your quiz...");
-  allQuestions.sort(() => Math.random() - 0.5);
-  const finalQuestions = pickRandomQuestions(allQuestions, totalQuestions);
+      updateLoaderText("Finalizing...");
+      allQuestions.sort(() => Math.random() - 0.5);
+      const finalQ = pickRandomQuestions(allQuestions, count);
 
-  if (finalQuestions.length === 0) {
-    app.showError("No questions found for selection.");
-    return;
-  }
-
-  startQuizEngine(finalQuestions);
-}
-
-// --- Loader Helpers ---
-function updateLoaderText(msg) {
-  const el = document.getElementById("loader-text");
-  if (el) el.textContent = msg;
-}
-
-// --- Subtopic Rendering ---
-function renderSubtopics(topicList) {
-  const list = document.getElementById("subtopic-list");
-  list.innerHTML = "";
-
-  if (topicList.length === 0) {
-    list.innerHTML = "<p>No subtopics found. The file structure might be unrecognized.</p>";
-    return;
-  }
-
-  topicList.forEach((topic) => {
-    const questionsInTopic = appState.topicMap[topic];
-    const qCount = questionsInTopic ? questionsInTopic.length : 0;
-    if (qCount === 0) return;
-
-    const label = document.createElement("label");
-    label.className = "checkbox-item";
-    label.innerHTML = `
-            <input type="checkbox" value="${topic}" checked>
-            <span>${topic} <small class="text-muted">(${qCount})</small></span>
-        `;
-    list.appendChild(label);
-  });
-
-  document.getElementById("btn-start-quiz").onclick = generateQuizFromSelection;
-}
-
-// --- Quiz Generation ---
-function generateQuizFromSelection() {
-  const checkboxes = document.querySelectorAll("#subtopic-list input:checked");
-  const selectedTopics = Array.from(checkboxes).map((cb) => cb.value);
-
-  if (selectedTopics.length === 0) {
-    alert("Please select at least one topic.");
-    return;
-  }
-
-  let quizQuestions = [];
-  selectedTopics.forEach((topic) => {
-    const questions = appState.topicMap[topic];
-    if (questions) {
-      const taggedQuestions = questions.map((q) => ({ ...q, _topic: topic }));
-      quizQuestions = [...quizQuestions, ...taggedQuestions];
-    }
-  });
-
-  startQuizEngine(quizQuestions);
-}
-
-// --- Random GK Helpers ---
-function pickRandomQuestions(allQuestions, limit) {
-  const byTopic = {};
-  allQuestions.forEach((q) => {
-    const t = q._topic || "General";
-    if (!byTopic[t]) byTopic[t] = [];
-    byTopic[t].push(q);
-  });
-
-  const topics = Object.keys(byTopic).sort(() => Math.random() - 0.5);
-  const result = [];
-
-  while (result.length < limit && topics.length) {
-    for (let t of topics) {
-      if (byTopic[t].length && result.length < limit) {
-        const idx = Math.floor(Math.random() * byTopic[t].length);
-        result.push(byTopic[t].splice(idx, 1)[0]);
+      if (finalQ.length === 0) {
+        app.showError("No questions available.");
+        return;
       }
+
+      startQuizEngine(finalQ);
     }
-  }
-  return result;
-}
 
-// --- Quiz Engine ---
-function startQuizEngine(questions) {
-  appState.questions = questions;
-  appState.currentQuestionIndex = 0;
-  appState.userAnswers = {};
-  appState._resultsComputed = false;
+    function pickRandomQuestions(allQ, limit) {
+      const result = [];
+      // Simple random pick
+      while (result.length < limit && allQ.length > 0) {
+        const idx = Math.floor(Math.random() * allQ.length);
+        result.push(allQ.splice(idx, 1)[0]);
+      }
+      return result;
+    }
 
-  app.showScreen("screen-quiz");
-  renderQuestion();
-}
+    function updateLoaderText(msg) {
+      const el = document.getElementById("loader-text");
+      if (el) el.textContent = msg;
+    }
 
-function renderQuestion() {
-  const qData = appState.questions[appState.currentQuestionIndex];
-  if (!qData) return;
+    // --- Subtopics ---
+    function renderSubtopics(topics) {
+      const list = document.getElementById("subtopic-list");
+      if (!list) return;
+      list.innerHTML = "";
 
-  const total = appState.questions.length;
-  const current = appState.currentQuestionIndex + 1;
-  document.getElementById("q-progress").textContent = `${current} / ${total}`;
-  document.getElementById("progress-fill").style.width = `${(current / total) * 100}%`;
+      if (topics.length === 0) {
+        list.innerHTML = "<p>No subtopics found.</p>";
+        return;
+      }
 
-  const qText = qData.question || qData.statement || "Question text missing";
-  document.getElementById("q-text").innerHTML = `${current}. ${qText}`;
+      topics.forEach((t) => {
+        const count = appState.topicMap[t] ? appState.topicMap[t].length : 0;
+        if (count === 0) return;
+        const lbl = document.createElement("label");
+        lbl.className = "checkbox-item";
+        lbl.innerHTML = `<input type="checkbox" value="${t}" checked> <span>${t} <small>(${count})</small></span>`;
+        list.appendChild(lbl);
+      });
 
-  const optionsContainer = document.getElementById("q-options");
-  optionsContainer.innerHTML = "";
+      const startBtn = document.getElementById("btn-start-quiz");
+      if (startBtn) startBtn.onclick = generateQuizFromSelection;
+    }
 
-  // Handle missing options gracefully
-  let options = qData.options || qData.choices || [];
-  if (!Array.isArray(options) && typeof options === "object") {
-    options = Object.values(options);
-  }
+    function generateQuizFromSelection() {
+      const checked = document.querySelectorAll("#subtopic-list input:checked");
+      const topics = Array.from(checked).map((cb) => cb.value);
+      if (topics.length === 0) {
+        alert("Select a topic.");
+        return;
+      }
+      let quizQ = [];
+      topics.forEach((t) => {
+        const arr = appState.topicMap[t];
+        if (arr) quizQ = [...quizQ, ...arr.map((q) => ({ ...q, _topic: t }))];
+      });
+      startQuizEngine(quizQ);
+    }
 
-  options.forEach((optText, index) => {
-    const label = document.createElement("label");
-    label.className = "option-label";
-    const isSelected = appState.userAnswers[appState.currentQuestionIndex] === optText;
-    if (isSelected) label.classList.add("selected");
-
-    label.innerHTML = `
-            <input type="radio" name="q-opt" class="hidden" ${isSelected ? "checked" : ""}>
-            <span>${optText}</span>
-        `;
-    label.onclick = () => selectOption(optText, index);
-    optionsContainer.appendChild(label);
-  });
-
-  const btnPrev = document.getElementById("btn-prev");
-  const btnNext = document.getElementById("btn-next");
-  const btnSubmit = document.getElementById("btn-submit");
-  const btnClear = document.getElementById("btn-clear");
-
-  if (appState.userAnswers[appState.currentQuestionIndex] != null) {
-    btnClear.classList.remove("hidden");
-  } else {
-    btnClear.classList.add("hidden");
-  }
-
-  btnClear.onclick = () => {
-    delete appState.userAnswers[appState.currentQuestionIndex];
-    renderQuestion();
-  };
-
-  if (current === 1) {
-    btnPrev.classList.add("hidden");
-  } else {
-    btnPrev.classList.remove("hidden");
-  }
-
-  if (current === total) {
-    btnNext.classList.add("hidden");
-    btnSubmit.classList.remove("hidden");
-  } else {
-    btnNext.classList.remove("hidden");
-    btnSubmit.classList.add("hidden");
-  }
-
-  btnPrev.onclick = () => {
-    if (appState.currentQuestionIndex > 0) {
-      appState.currentQuestionIndex--;
+    // --- Quiz Engine ---
+    function startQuizEngine(questions) {
+      appState.questions = questions;
+      appState.currentQuestionIndex = 0;
+      appState.userAnswers = {};
+      app.showScreen("screen-quiz");
       renderQuestion();
     }
-  };
 
-  btnNext.onclick = () => {
-    if (appState.currentQuestionIndex < appState.questions.length - 1) {
-      appState.currentQuestionIndex++;
-      renderQuestion();
-    }
-  };
+    function renderQuestion() {
+      const q = appState.questions[appState.currentQuestionIndex];
+      if (!q) return;
 
-  btnSubmit.onclick = calculateResults;
+      const curr = appState.currentQuestionIndex + 1;
+      const total = appState.questions.length;
 
-  if (window.MathJax) {
-    MathJax.typesetPromise();
-  }
-  saveAppState();
-}
+      document.getElementById("q-progress").textContent = `${curr} / ${total}`;
+      document.getElementById("progress-fill").style.width = `${
+        (curr / total) * 100
+      }%`;
 
-function selectOption(optText, index) {
-  appState.userAnswers[appState.currentQuestionIndex] = optText;
-  renderQuestion();
-}
+      document.getElementById("q-text").innerHTML = `${curr}. ${
+        q.question || q.statement || "No text"
+      }`;
 
-// --- Results with Topic-wise Strength/Weakness ---
-function calculateResults() {
-  let score = 0;
-  let correctCount = 0;
-  let wrongCount = 0;
-  const total = appState.questions.length;
+      const optsDiv = document.getElementById("q-options");
+      optsDiv.innerHTML = "";
 
-  const reviewList = document.getElementById("review-list");
-  reviewList.innerHTML = "";
+      let opts = q.options || q.choices || [];
+      if (!Array.isArray(opts) && typeof opts === "object")
+        opts = Object.values(opts);
 
-  const topicStats = {};
+      opts.forEach((opt) => {
+        const lbl = document.createElement("label");
+        lbl.className = "option-label";
+        if (appState.userAnswers[appState.currentQuestionIndex] === opt) {
+          lbl.classList.add("selected");
+        }
+        lbl.innerHTML = `<input type="radio" class="hidden"> <span>${opt}</span>`;
+        lbl.onclick = () => {
+          appState.userAnswers[appState.currentQuestionIndex] = opt;
+          renderQuestion();
+        };
+        optsDiv.appendChild(lbl);
+      });
 
-  appState.questions.forEach((q, index) => {
-    const userAns = appState.userAnswers[index];
-    const correctAns = q.answer;
-    const topic = q._topic || "Misc";
+      // Buttons
+      const prev = document.getElementById("btn-prev");
+      const next = document.getElementById("btn-next");
+      const submit = document.getElementById("btn-submit");
+      const clear = document.getElementById("btn-clear");
 
-    if (!topicStats[topic]) {
-      topicStats[topic] = {
-        total: 0,
-        correct: 0,
-        wrong: 0,
-        unattempted: 0,
-        accuracy: 0,
-        level: "",
-      };
-    }
+      if (appState.userAnswers[appState.currentQuestionIndex])
+        clear.classList.remove("hidden");
+      else clear.classList.add("hidden");
 
-    const t = topicStats[topic];
-    t.total += 1;
-
-    const isUnattempted = userAns == null || userAns === "" || userAns === undefined;
-    const isCorrect = !isUnattempted && userAns === correctAns;
-
-    if (isUnattempted) {
-      t.unattempted++;
-    } else if (isCorrect) {
-      score += 1;
-      correctCount++;
-      t.correct++;
-    } else {
-      wrongCount++;
-      t.wrong++;
-      if (appState.negativeMarking) {
-        score -= 0.33;
-      }
-    }
-
-    const reviewItem = document.createElement("div");
-    reviewItem.className = `review-item ${isCorrect ? "correct" : "wrong"}`;
-    
-    // Safety check for options existing to determine "Wrong" vs "Unattempted" visually if desired
-    // But basic display logic:
-    reviewItem.innerHTML = `
-            <p><strong>Q${index + 1}:</strong> ${q.question || q.statement}</p>
-            <div class="ans-row">
-                <span class="${isCorrect ? "text-green" : "text-red"}">
-                    Your Answer: ${userAns || "Not Attempted"}
-                </span>
-            </div>
-            ${
-              !isCorrect
-                ? `<div class="ans-row"><span class="text-green">Correct Answer: ${correctAns}</span></div>`
-                : ""
-            }
-            <div class="ans-row"><small class="text-muted">Topic: ${topic}</small></div>
-            ${
-              q.explanation
-                ? `<div class="ans-row" style="margin-top:0.5rem; font-style:italic; font-size:0.9rem; color:#64748b;">💡 Explanation: ${q.explanation}</div>`
-                : ""
-            }
-        `;
-    reviewList.appendChild(reviewItem);
-  });
-
-  Object.keys(topicStats).forEach((topic) => {
-    const t = topicStats[topic];
-    t.accuracy = t.total > 0 ? Math.round((t.correct / t.total) * 100) : 0;
-    if (t.accuracy >= 80) t.level = "Strong";
-    else if (t.accuracy >= 50) t.level = "Needs Practice";
-    else t.level = "Weak";
-  });
-
-  score = Math.max(0, score);
-  score = score.toFixed(2);
-
-  document.getElementById("score-text").textContent = `${score}/${total}`;
-  document.getElementById("stat-correct").textContent = correctCount;
-  document.getElementById("stat-wrong").textContent = wrongCount;
-
-  renderTopicStats(topicStats);
-  app.showScreen("screen-result");
-
-  if (window.MathJax) {
-    MathJax.typesetPromise([document.getElementById("review-list")]);
-  }
-  saveAppState();
-}
-
-function renderTopicStats(topicStats) {
-  const container = document.getElementById("topic-stats");
-  if (!container) return;
-  container.innerHTML = "";
-
-  const topics = Object.keys(topicStats);
-  if (topics.length === 0) {
-    container.textContent = "No topic data available.";
-    return;
-  }
-
-  topics.forEach((topic) => {
-    const { total, correct, wrong, unattempted, accuracy, level } = topicStats[topic];
-    let levelClass = "";
-    if (level === "Strong") levelClass = "text-green";
-    if (level === "Weak") levelClass = "text-red";
-
-    const row = document.createElement("div");
-    row.style.display = "flex";
-    row.style.justifyContent = "space-between";
-    row.style.alignItems = "center";
-    row.style.padding = "0.5rem 0";
-    row.style.borderBottom = "1px solid var(--border)";
-
-    row.innerHTML = `
-            <div>
-                <strong>${topic}</strong>
-                <div style="font-size:0.8rem; color:var(--text-muted);">
-                    ${correct}/${total} correct,
-                    ${wrong} wrong,
-                    ${unattempted} unattempted
-                </div>
-            </div>
-            <div style="text-align:right;">
-                <div class="${levelClass}" style="font-weight:600;">${accuracy}%</div>
-                <div style="font-size:0.8rem; color:var(--text-muted);">${level}</div>
-            </div>
-        `;
-    container.appendChild(row);
-  });
-}
-
-function getCacheKey(subject, year) {
-  return `${CACHE_PREFIX}-${subject}-${year}`;
-}
-
-function getCachedGK(subject, year) {
-  const memKey = `${subject}-${year}`;
-  if (GK_CACHE[memKey]) return GK_CACHE[memKey];
-
-  const localKey = getCacheKey(subject, year);
-  const raw = localStorage.getItem(localKey);
-  if (!raw) return null;
-
-  try {
-    const parsed = JSON.parse(raw);
-    GK_CACHE[memKey] = parsed;
-    return parsed;
-  } catch {
-    return null;
-  }
-}
-
-function setCachedGK(subject, year, data) {
-  const memKey = `${subject}-${year}`;
-  const localKey = getCacheKey(subject, year);
-  GK_CACHE[memKey] = data;
-  try {
-    localStorage.setItem(localKey, JSON.stringify(data));
-  } catch {
-    // storage full
-  }
-}
-
-// Updated Subject List based on your files
-const GK_SUBJECTS = [
-  "Biology",
-  "Chemistry",
-  "Economy",
-  "General_Knowledge",
-  "Geography",
-  "History",
-  "Physics"
-];
-
-// --- Theme Management ---
-function initTheme() {
-  const toggle = document.getElementById("theme-toggle");
-  if (!toggle) return;
-
-  const savedTheme = localStorage.getItem("theme");
-  const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-
-  if (savedTheme === "dark" || (!savedTheme && systemPrefersDark)) {
-    document.body.setAttribute("data-theme", "dark");
-    document.getElementById("sun-icon").classList.remove("hidden");
-    document.getElementById("moon-icon").classList.add("hidden");
-  } else {
-    document.body.removeAttribute("data-theme");
-    document.getElementById("sun-icon").classList.add("hidden");
-    document.getElementById("moon-icon").classList.remove("hidden");
-  }
-
-  toggle.onclick = () => {
-    const isDark = document.body.getAttribute("data-theme") === "dark";
-    if (isDark) {
-      document.body.removeAttribute("data-theme");
-      localStorage.setItem("theme", "light");
-      document.getElementById("sun-icon").classList.add("hidden");
-      document.getElementById("moon-icon").classList.remove("hidden");
-    } else {
-      document.body.setAttribute("data-theme", "dark");
-      localStorage.setItem("theme", "dark");
-      document.getElementById("sun-icon").classList.remove("hidden");
-      document.getElementById("moon-icon").classList.add("hidden");
-    }
-  };
-}
-
-// --- Router / reload handling ---
-function restoreOrBoot() {
-  const saved = loadSavedAppState();
-  loadSubjects();
-
-  if (!saved) {
-    app.showScreen("screen-subjects", { skipHistory: true });
-    return;
-  }
-
-  appState.subject = saved.subject || null;
-  appState.year = saved.year || null;
-  appState.subtopics = saved.subtopics || [];
-  appState.questions = saved.questions || [];
-  appState.currentQuestionIndex = saved.currentQuestionIndex || 0;
-  appState.userAnswers = saved.userAnswers || {};
-  appState.topicMap = saved.topicMap || null;
-  appState.currentScreen = saved.currentScreen || "screen-subjects";
-
-  if (appState.subject) {
-    const title = appState.subject.replace(/_/g, " ");
-    document.getElementById("selected-subject-title").textContent = title;
-    
-    // Restore grid for back button functionality
-    const years = QUIZ_TREE[appState.subject] || [];
-    const grid = document.getElementById("year-grid");
-    grid.innerHTML = "";
-    years.forEach((year) => {
-      const btn = document.createElement("div");
-      btn.className = "card-btn";
-      btn.textContent = year;
-      btn.onclick = () => selectYear(appState.subject, `${year}.json`);
-      grid.appendChild(btn);
-    });
-  }
-
-  const screen = appState.currentScreen;
-
-  if (screen === "screen-years") {
-    app.showScreen("screen-years", { skipHistory: true });
-  } else if (screen === "screen-subtopics") {
-    if (appState.topicMap) {
-      const subtopics = Object.keys(appState.topicMap);
-      renderSubtopics(subtopics);
-      app.showScreen("screen-subtopics", { skipHistory: true });
-    } else {
-      app.showScreen("screen-subjects", { skipHistory: true });
-    }
-  } else if (screen === "screen-random-config") {
-    loadRandomGKSubjects();
-    app.showScreen("screen-random-config", { skipHistory: true });
-  } else if (screen === "screen-quiz") {
-    if (appState.questions && appState.questions.length > 0) {
-      if (appState.topicMap) {
-        renderSubtopics(Object.keys(appState.topicMap));
-      }
-      app.showScreen("screen-quiz", { skipHistory: true });
-      renderQuestion();
-    } else {
-      app.showScreen("screen-subjects", { skipHistory: true });
-    }
-  } else if (screen === "screen-result") {
-    if (appState._resultsComputed) {
-      app.showScreen("screen-result", { skipHistory: true });
-    } else if (appState.questions && appState.questions.length > 0) {
-      calculateResults(); 
-    } else {
-      app.showScreen("screen-subjects", { skipHistory: true });
-    }
-  } else {
-    app.showScreen("screen-subjects", { skipHistory: true });
-  }
-}
-
-function initRandomGK() {
-  const btn = document.getElementById("start-random");
-  if (!btn) return;
-  btn.onclick = buildRandomGKQuiz;
-}
-
-function initRandomQuizButton() {
-  const btn = document.getElementById("random-quiz-btn");
-  if (!btn) return;
-  btn.onclick = () => {
-    app.showScreen("screen-random-config");
-    loadRandomGKSubjects();
-  };
-}
-
-function initRouter() {
-  window.addEventListener("popstate", (event) => {
-    const state = event.state;
-    if (state && state.screenId) {
-      const screenId = state.screenId;
-      app.showScreen(screenId, { skipHistory: true });
-
-      if (screenId === "screen-quiz") {
+      clear.onclick = () => {
+        delete appState.userAnswers[appState.currentQuestionIndex];
         renderQuestion();
-      } else if (screenId === "screen-result") {
-        calculateResults();
-      }
-    } else {
-      app.showScreen("screen-subjects", { skipHistory: true });
-    }
-  });
-}
+      };
 
-// --- INITIALIZATION ---
-initTheme();
-restoreOrBoot();
-initRouter();
-initRandomGK();
-initRandomQuizButton();
+      if (curr === 1) prev.classList.add("hidden");
+      else prev.classList.remove("hidden");
+
+      if (curr === total) {
+        next.classList.add("hidden");
+        submit.classList.remove("hidden");
+      } else {
+        next.classList.remove("hidden");
+        submit.classList.add("hidden");
+      }
+
+      prev.onclick = () => {
+        appState.currentQuestionIndex--;
+        renderQuestion();
+      };
+      next.onclick = () => {
+        appState.currentQuestionIndex++;
+        renderQuestion();
+      };
+      submit.onclick = calculateResults;
+
+      if (window.MathJax) MathJax.typesetPromise();
+      saveAppState();
+    }
+
+    function calculateResults() {
+      let score = 0,
+        correct = 0,
+        wrong = 0;
+      const reviewDiv = document.getElementById("review-list");
+      reviewDiv.innerHTML = "";
+      const stats = {};
+
+      appState.questions.forEach((q, idx) => {
+        const uAns = appState.userAnswers[idx];
+        const cAns = q.answer;
+        const topic = q._topic || "General";
+
+        if (!stats[topic])
+          stats[topic] = { total: 0, correct: 0, wrong: 0, unattempted: 0 };
+        stats[topic].total++;
+
+        const isCorrect = uAns === cAns;
+        const isUnattempted = !uAns;
+
+        if (isCorrect) {
+          score++;
+          correct++;
+          stats[topic].correct++;
+        } else if (!isUnattempted) {
+          wrong++;
+          stats[topic].wrong++;
+          if (appState.negativeMarking) score -= 0.33;
+        } else {
+          stats[topic].unattempted++;
+        }
+
+        const div = document.createElement("div");
+        div.className = `review-item ${isCorrect ? "correct" : "wrong"}`;
+        div.innerHTML = `
+          <p><strong>Q${idx + 1}:</strong> ${q.question || q.statement}</p>
+          <div class="ans-row">
+             <span class="${isCorrect ? "text-green" : "text-red"}">Your: ${
+          uAns || "Skipped"
+        }</span>
+          </div>
+          ${
+            !isCorrect
+              ? `<div class="ans-row"><span class="text-green">Correct: ${cAns}</span></div>`
+              : ""
+          }
+          <div class="ans-row"><small>${topic}</small></div>
+        `;
+        reviewDiv.appendChild(div);
+      });
+
+      document.getElementById("score-text").textContent = Math.max(
+        0,
+        score
+      ).toFixed(2);
+      document.getElementById("stat-correct").textContent = correct;
+      document.getElementById("stat-wrong").textContent = wrong;
+
+      const statDiv = document.getElementById("topic-stats");
+      statDiv.innerHTML = "";
+      Object.keys(stats).forEach((t) => {
+        const s = stats[t];
+        const acc = s.total ? Math.round((s.correct / s.total) * 100) : 0;
+        const row = document.createElement("div");
+        row.style =
+          "display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding:5px 0";
+        row.innerHTML = `<div><strong>${t}</strong><br><small>${s.correct}/${s.total}</small></div> <strong>${acc}%</strong>`;
+        statDiv.appendChild(row);
+      });
+
+      app.showScreen("screen-result");
+    }
+
+    // --- Cache ---
+    function getCachedGK(sub, yr) {
+      const key = `${sub}-${yr}`;
+      if (GK_CACHE[key]) return GK_CACHE[key];
+      const local = localStorage.getItem(`${CACHE_PREFIX}-${key}`);
+      return local ? JSON.parse(local) : null;
+    }
+    function setCachedGK(sub, yr, data) {
+      const key = `${sub}-${yr}`;
+      GK_CACHE[key] = data;
+      try {
+        localStorage.setItem(`${CACHE_PREFIX}-${key}`, JSON.stringify(data));
+      } catch {}
+    }
+
+    // --- Init ---
+    function initTheme() {
+      const t = localStorage.getItem("theme");
+      if (t === "dark") document.body.setAttribute("data-theme", "dark");
+      const btn = document.getElementById("theme-toggle");
+      if (btn) {
+        btn.onclick = () => {
+          if (document.body.getAttribute("data-theme") === "dark") {
+            document.body.removeAttribute("data-theme");
+            localStorage.setItem("theme", "light");
+          } else {
+            document.body.setAttribute("data-theme", "dark");
+            localStorage.setItem("theme", "dark");
+          }
+        };
+      }
+    }
+
+    function init() {
+      initTheme();
+
+      // Hook up static buttons
+      const randBtn = document.getElementById("random-quiz-btn");
+      if (randBtn) {
+        randBtn.onclick = () => {
+          app.showScreen("screen-random-config");
+          loadRandomGKSubjects();
+        };
+      }
+
+      const startRand = document.getElementById("start-random");
+      if (startRand) startRand.onclick = buildRandomGKQuiz;
+
+      // Global Expose for Header
+      window.app = app;
+
+      // Boot
+      const saved = loadSavedAppState();
+      loadSubjects(); // Ensure grid is populated
+
+      if (saved && saved.currentScreen) {
+        // Restore minimal state
+        appState.subject = saved.subject;
+        appState.year = saved.year;
+        appState.subtopics = saved.subtopics;
+        appState.questions = saved.questions;
+        appState.currentQuestionIndex = saved.currentQuestionIndex;
+        appState.userAnswers = saved.userAnswers;
+        appState.topicMap = saved.topicMap;
+
+        // Route
+        if (saved.currentScreen === "screen-subjects") {
+          app.showScreen("screen-subjects");
+        } else {
+          // If deep linked, show screen.
+          // Note: If topicMap is missing (cleared cache), might fail. Safe fallback:
+          if (
+            (saved.currentScreen === "screen-quiz" ||
+              saved.currentScreen === "screen-subtopics") &&
+            !appState.topicMap
+          ) {
+            app.showScreen("screen-subjects");
+          } else {
+            app.showScreen(saved.currentScreen);
+            if (saved.currentScreen === "screen-quiz") renderQuestion();
+          }
+        }
+      } else {
+        app.showScreen("screen-subjects");
+      }
+    }
+
+    // Run Init
+    init();
+  } catch (criticalError) {
+    alert("Critical Script Error: " + criticalError.message);
+    console.error(criticalError);
+  }
+})();
