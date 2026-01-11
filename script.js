@@ -1,21 +1,18 @@
 /**
  * CDS PYQ Quiz Platform
  * Customized for cds-pyq-json data structure
- * Fixed: Variable hoisting, Error Handling, and Robust Initialization
+ * Fixed: Explanations now showing in results
  */
 
 (function () {
-  // Wrap in IIFE to avoid global scope pollution
   try {
     const REPO_OWNER = "deepak-gurjar07";
     const REPO_NAME = "cds-pyq-json";
     const BRANCH = "main";
 
-    // --- Random GK Cache ---
     const GK_CACHE = {};
     const CACHE_PREFIX = "cds-gk-cache-v2";
 
-    // --- CONFIGURATION: SUBJECTS FOR RANDOM QUIZ (Moved to top) ---
     const GK_SUBJECTS = [
       "Biology",
       "Chemistry",
@@ -26,7 +23,6 @@
       "Physics",
     ];
 
-    // --- CONFIGURATION: FILE MAPPING ---
     const QUIZ_TREE = {
       Biology: [
         "2007-I", "2007-II", "2008-I", "2008-II", "2009-I", "2009-II", "2010-I", "2010-II",
@@ -64,7 +60,6 @@
       ]
     };
 
-    // --- App State ---
     const appState = {
       currentScreen: "screen-subjects",
       subject: null,
@@ -78,9 +73,8 @@
       negativeMarking: true,
     };
 
-    const APP_STATE_STORAGE_KEY = "cdsQuizStateV3"; // Force fresh state
+    const APP_STATE_STORAGE_KEY = "cdsQuizStateV4";
 
-    // --- DOM Elements ---
     const screens = {
       subjects: document.getElementById("screen-subjects"),
       random: document.getElementById("screen-random-config"),
@@ -92,7 +86,6 @@
       error: document.getElementById("error-screen"),
     };
 
-    // --- Helpers ---
     function saveAppState() {
       try {
         const toSave = {
@@ -126,10 +119,8 @@
       } catch {}
     }
 
-    // --- Navigation ---
     const app = {
       showScreen: (screenId, options = {}) => {
-        // 1. Hide all first
         Object.values(screens).forEach((s) => {
           if (s) {
             s.classList.remove("active");
@@ -137,7 +128,6 @@
           }
         });
 
-        // 2. Show target
         const el = document.getElementById(screenId);
         if (el) {
           el.classList.remove("hidden");
@@ -213,7 +203,6 @@
       },
     };
 
-    // --- Logic: Load Subjects ---
     function loadSubjects() {
       const grid = document.getElementById("subject-grid");
       if (!grid) return;
@@ -231,7 +220,6 @@
       });
     }
 
-    // --- Logic: Load Years ---
     function selectSubject(subjectName) {
       appState.subject = subjectName;
       const titleEl = document.getElementById("selected-subject-title");
@@ -256,7 +244,6 @@
       app.showScreen("screen-years");
     }
 
-    // --- Logic: Fetch & Parse ---
     async function selectYear(subject, filename) {
       const rawUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${subject}/${filename}`;
       appState.year = filename.replace(".json", "");
@@ -285,7 +272,6 @@
       }
     }
 
-    // --- Logic: Random Quiz ---
     function loadRandomGKSubjects() {
       const container = document.getElementById("random-subjects");
       if (!container || container.children.length > 0) return;
@@ -365,7 +351,6 @@
 
     function pickRandomQuestions(allQ, limit) {
       const result = [];
-      // Simple random pick
       while (result.length < limit && allQ.length > 0) {
         const idx = Math.floor(Math.random() * allQ.length);
         result.push(allQ.splice(idx, 1)[0]);
@@ -378,7 +363,6 @@
       if (el) el.textContent = msg;
     }
 
-    // --- Subtopics ---
     function renderSubtopics(topics) {
       const list = document.getElementById("subtopic-list");
       if (!list) return;
@@ -417,7 +401,6 @@
       startQuizEngine(quizQ);
     }
 
-    // --- Quiz Engine ---
     function startQuizEngine(questions) {
       appState.questions = questions;
       appState.currentQuestionIndex = 0;
@@ -463,7 +446,6 @@
         optsDiv.appendChild(lbl);
       });
 
-      // Buttons
       const prev = document.getElementById("btn-prev");
       const next = document.getElementById("btn-next");
       const submit = document.getElementById("btn-submit");
@@ -503,6 +485,7 @@
       saveAppState();
     }
 
+    // --- FIX IS IN THIS FUNCTION ---
     function calculateResults() {
       let score = 0,
         correct = 0,
@@ -537,6 +520,8 @@
 
         const div = document.createElement("div");
         div.className = `review-item ${isCorrect ? "correct" : "wrong"}`;
+        
+        // --- ADDED EXPLANATION LOGIC BELOW ---
         div.innerHTML = `
           <p><strong>Q${idx + 1}:</strong> ${q.question || q.statement}</p>
           <div class="ans-row">
@@ -550,6 +535,11 @@
               : ""
           }
           <div class="ans-row"><small>${topic}</small></div>
+          ${
+            q.explanation 
+              ? `<div class="ans-row" style="margin-top:0.5rem; font-style:italic; font-size:0.9rem; color:var(--text-muted);">💡 Explanation: ${q.explanation}</div>` 
+              : ""
+          }
         `;
         reviewDiv.appendChild(div);
       });
@@ -574,9 +564,9 @@
       });
 
       app.showScreen("screen-result");
+      if (window.MathJax) MathJax.typesetPromise();
     }
 
-    // --- Cache ---
     function getCachedGK(sub, yr) {
       const key = `${sub}-${yr}`;
       if (GK_CACHE[key]) return GK_CACHE[key];
@@ -591,7 +581,6 @@
       } catch {}
     }
 
-    // --- Init ---
     function initTheme() {
       const t = localStorage.getItem("theme");
       if (t === "dark") document.body.setAttribute("data-theme", "dark");
@@ -612,7 +601,6 @@
     function init() {
       initTheme();
 
-      // Hook up static buttons
       const randBtn = document.getElementById("random-quiz-btn");
       if (randBtn) {
         randBtn.onclick = () => {
@@ -624,15 +612,12 @@
       const startRand = document.getElementById("start-random");
       if (startRand) startRand.onclick = buildRandomGKQuiz;
 
-      // Global Expose for Header
       window.app = app;
 
-      // Boot
       const saved = loadSavedAppState();
-      loadSubjects(); // Ensure grid is populated
+      loadSubjects();
 
       if (saved && saved.currentScreen) {
-        // Restore minimal state
         appState.subject = saved.subject;
         appState.year = saved.year;
         appState.subtopics = saved.subtopics;
@@ -641,12 +626,9 @@
         appState.userAnswers = saved.userAnswers;
         appState.topicMap = saved.topicMap;
 
-        // Route
         if (saved.currentScreen === "screen-subjects") {
           app.showScreen("screen-subjects");
         } else {
-          // If deep linked, show screen.
-          // Note: If topicMap is missing (cleared cache), might fail. Safe fallback:
           if (
             (saved.currentScreen === "screen-quiz" ||
               saved.currentScreen === "screen-subtopics") &&
@@ -663,7 +645,6 @@
       }
     }
 
-    // Run Init
     init();
   } catch (criticalError) {
     alert("Critical Script Error: " + criticalError.message);
