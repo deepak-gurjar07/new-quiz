@@ -42,7 +42,7 @@
   </head>
   <body>
     <header>
-      <div class="logo" onclick="app.goHome()">
+      <div class="logo" onclick="window.app && window.app.goHome()">
         CDS <span class="highlight">Master</span>
       </div>
       <button id="theme-toggle" class="icon-btn" aria-label="Toggle Dark Mode">
@@ -59,29 +59,6 @@
           stroke-linejoin="round"
         >
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-        </svg>
-        <svg
-          id="sun-icon"
-          class="hidden"
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <circle cx="12" cy="12" r="5"></circle>
-          <line x1="12" y1="1" x2="12" y2="3"></line>
-          <line x1="12" y1="21" x2="12" y2="23"></line>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-          <line x1="1" y1="12" x2="3" y2="12"></line>
-          <line x1="21" y1="12" x2="23" y2="12"></line>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
         </svg>
       </button>
     </header>
@@ -112,12 +89,11 @@
           <div id="random-quiz-btn" class="card-btn random-card">
             🎯 Take Random GK Quiz
           </div>
-          </div>
+        </div>
       </div>
 
       <div id="screen-random-config" class="screen hidden">
-        <button class="btn-back" onclick="app.goBack()">← Back</button>
-
+        <button class="btn-back" onclick="window.app.goBack()">← Back</button>
         <div class="header-section">
           <h1>Random GK Quiz</h1>
           <p>Select subjects, topics, and number of questions</p>
@@ -137,14 +113,11 @@
               step="5"
               value="20"
             />
-            <small class="text-muted">
-              Recommended: 20–30 for focused practice
-            </small>
           </div>
-
+          
           <label class="checkbox-item" style="margin-top: 1rem">
             <input type="checkbox" id="neg-marking-toggle" checked />
-            <span>Apply negative marking (−0.33 for wrong answers)</span>
+            <span>Apply negative marking (−0.33)</span>
           </label>
 
           <button class="btn btn-primary btn-large" id="start-random">
@@ -154,7 +127,7 @@
       </div>
 
       <div id="screen-years" class="screen hidden">
-        <button class="btn-back" onclick="app.goBack()">← Back</button>
+        <button class="btn-back" onclick="window.app.goBack()">← Back</button>
         <div class="header-section">
           <h1 id="selected-subject-title">Subject</h1>
           <p>Select a Year</p>
@@ -163,7 +136,7 @@
       </div>
 
       <div id="screen-subtopics" class="screen hidden">
-        <button class="btn-back" onclick="app.goBack()">← Back</button>
+        <button class="btn-back" onclick="window.app.goBack()">← Back</button>
         <div class="header-section">
           <h1 id="config-title">Configure Quiz</h1>
           <p>Select topics to include</p>
@@ -181,7 +154,7 @@
       </div>
 
       <div id="screen-quiz" class="screen hidden">
-        <button class="btn-back" onclick="app.quitQuiz()">← Quit Quiz</button>
+        <button class="btn-back" onclick="window.app.quitQuiz()">← Quit Quiz</button>
 
         <div class="quiz-header">
           <div class="progress-wrapper">
@@ -197,17 +170,13 @@
 
         <div class="quiz-footer">
           <button id="btn-prev" class="btn btn-outline hidden">Previous</button>
-
           <button
             id="btn-clear"
-            class="btn btn-outline"
-            title="Clear selected answer"
+            class="btn btn-outline hidden"
           >
             Clear Answer
           </button>
-
           <button id="btn-next" class="btn btn-primary">Next Question</button>
-
           <button id="btn-submit" class="btn btn-secondary hidden">
             Submit Quiz
           </button>
@@ -233,7 +202,7 @@
           </div>
 
           <button
-            onclick="clearSavedAppState(); location.reload()"
+            onclick="location.reload()"
             class="btn btn-primary"
           >
             Take Another Quiz
@@ -242,15 +211,6 @@
 
         <div class="result-card">
           <h3>Topic-wise Performance</h3>
-          <p
-            style="
-              margin-top: 0.5rem;
-              font-size: 0.9rem;
-              color: var(--text-muted);
-            "
-          >
-            See which topics are strong and which need more practice.
-          </p>
           <div id="topic-stats" style="margin-top: 1rem"></div>
         </div>
 
